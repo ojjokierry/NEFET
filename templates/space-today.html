@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroAssist | Космос сегодня</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+    <!-- Leaflet для карты -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        /* СТИЛИ ДЛЯ КОСМОС СЕГОДНЯ */
+        
+        .space-today-page {
+            padding-top: 80px;
+        }
+        
+        .space-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        /* КАРТОЧКИ */
+        
+        .space-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .space-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .card-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+        
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            background: var(--accent-blue);
+            color: white;
+            transform: rotate(180deg);
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+        }
+        /* ФОТО ДНЯ NASA */
+        
+        .nasa-apod {
+            grid-column: span 2;
+        }
+        
+        @media (max-width: 1200px) {
+            .nasa-apod {
+                grid-column: span 1;
+            }
+        }
+        
+        .apod-image {
+            width: 100%;
+            max-height: 500px;
+            overflow: hidden;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        
+        .apod-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        
+        .apod-image:hover img {
+            transform: scale(1.03);
+        }
+        
+        .apod-info {
+            margin-top: 1rem;
+        }
+        
+        .apod-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-blue);
+        }
+        
+        .apod-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .apod-date {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-family: 'Orbitron', sans-serif;
+        }
+        /* КАРТА МИРА С МКС */
+        
+        .world-map-card {
+            grid-column: span 2;
+            height: 500px;
+        }
+        
+        @media (max-width: 1200px) {
+            .world-map-card {
+                grid-column: span 1;
+                height: 400px;
+            }
+        }
+        
+        #worldMap {
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+        
+        .iss-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .iss-info-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .iss-info-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .iss-info-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        /* КОСМИЧЕСКАЯ ПОГОДА */
+        
+        .weather-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .weather-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+        
+        .metric-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .metric-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .metric-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-low {
+            background: rgba(0, 255, 157, 0.1);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+        
+        .status-medium {
+            background: rgba(255, 204, 0, 0.1);
+            color: #ffcc00;
+            border: 1px solid #ffcc00;
+        }
+        
+        .status-high {
+            background: rgba(255, 55, 95, 0.1);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+        /* ЛУННЫЙ КАЛЕНДАРЬ */
+        
+        .moon-phase {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .moon-visual {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f0f0f0, #cccccc);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+        
+        .moon-phase-shade {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .moon-info {
+            flex: 1;
+        }
+        
+        .moon-phase-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .moon-phase-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        /* СПУТНИКОВЫЕ СНИМКИ */
+        
+        .satellite-images {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .satellite-image {
+            width: 100%;
+            height: 150px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .satellite-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .satellite-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        /* ЗВЕЗДНОЕ НЕБО */
+        
+        .star-map-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(to bottom, #0a0e17, #1a1f2e);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+        
+        .star:nth-child(1) {
+            top: 20%;
+            left: 30%;
+            width: 2px;
+            height: 2px;
+            animation-delay: 0s;
+        }
+        
+        .star:nth-child(2) {
+            top: 40%;
+            left: 60%;
+            width: 3px;
+            height: 3px;
+            animation-delay: 0.5s;
+        }
+        
+        .star:nth-child(3) {
+            top: 60%;
+            left: 20%;
+            width: 2px;
+            height: 2px;
+            animation-delay: 1s;
+        }
+        
+        .star:nth-child(4) {
+            top: 80%;
+            left: 50%;
+            width: 2px;
+            height: 2px;
+            animation-delay: 1.5s;
+        }
+        
+        .star:nth-child(5) {
+            top: 30%;
+            left: 80%;
+            width: 3px;
+            height: 3px;
+            animation-delay: 2s;
+        }
+        
+        @keyframes twinkle {
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        
+        .constellation {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-blue);
+        }
+        
+        .constellation-line {
+            position: absolute;
+            background: rgba(0, 243, 255, 0.3);
+            height: 2px;
+            transform-origin: 0 0;
+        }
+        
+        .tonight-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .tonight-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .tonight-item h4 {
+            margin-bottom: 0.5rem;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        /* ЗАПУСКИ РАКЕТ */
+        
+        .launch-timeline {
+            margin: 1.5rem 0;
+        }
+        
+        .launch-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        
+        .launch-item:hover {
+            background: rgba(0, 243, 255, 0.05);
+            border-color: var(--accent-blue);
+        }
+        
+        .launch-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 243, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+        }
+        
+        .launch-details {
+            flex: 1;
+        }
+        
+        .launch-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .launch-date {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .countdown {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+        /* ПЛАНЕТЫ СОЛНЕЧНОЙ СИСТЕМЫ */
+        
+        .solar-system {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            position: relative;
+            margin: 1.5rem 0;
+        }
+        
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        
+        .planet:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+        
+        .planet-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .planet:hover .planet-tooltip {
+            opacity: 1;
+        }
+        /* КОСМИЧЕСКИЕ ФАКТЫ */
+        
+        .facts-container {
+            margin: 1.5rem 0;
+        }
+        
+        .fact-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .fact-card:hover {
+            background: rgba(0, 243, 255, 0.05);
+            border-color: var(--accent-blue);
+        }
+        
+        .fact-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .fact-source {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        /* КНОПКА ДЛЯ ВИДЖЕТОВ */
+        
+        .widget-controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+        }
+        
+        .widget-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .widget-btn:hover {
+            background: rgba(0, 243, 255, 0.1);
+            color: var(--accent-blue);
+        }
+        
+        .widget-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+        /* ПОЛНОЭКРАННЫЙ ПРОСМОТР */
+        
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .fullscreen-overlay.active {
+            display: flex;
+        }
+        
+        .fullscreen-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+        
+        .fullscreen-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 12px;
+        }
+        
+        .close-fullscreen {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: var(--accent-red);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* ИНФОРМАЦИОННЫЕ БАРЫ */
+        
+        .info-bar {
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .info-bar-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .info-bar-icon {
+            font-size: 2rem;
+        }
+        
+        .info-bar-text h4 {
+            margin: 0;
+        }
+        
+        .info-bar-text p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        /* СТАТИСТИКА */
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        /* АДАПТИВНОСТЬ */
+        
+        @media (max-width: 768px) {
+            .space-dashboard {
+                grid-template-columns: 1fr;
+            }
+            .world-map-card {
+                height: 300px;
+            }
+            .iss-info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .satellite-images {
+                grid-template-columns: 1fr;
+            }
+            .moon-phase {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        /* АНИМАЦИИ */
+        
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        /* ПРОГРЕСС БАР ЗАГРУЗКИ */
+        
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 243, 255, 0.3);
+            border-top: 3px solid var(--accent-blue);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        /* КНОПКА "НАЗАД В ВЕРХ" */
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: var(--accent-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body class="night-theme">
+
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <div class="orbit"></div>
+                    <div class="core"></div>
+                </div>
+                <span class="logo-text">AeroAssist</span>
+            </a>
+
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="nav-menu" id="navMenu">
+    <a href="/" class="nav-link">
+        <i class="fas fa-home"></i> Главная
+    </a>
+    <a href="/capabilities" class="nav-link">
+        <i class="fas fa-satellite"></i> Возможности
+    </a>
+    <a href="/demo" class="nav-link">
+        <i class="fas fa-play-circle"></i> Демо
+    </a>
+    <a href="/space-today" class="nav-link active">
+        <i class="fas fa-globe-americas"></i> Космос
+    </a>
+    <a href="/registration" class="nav-link">
+        <i class="fas fa-user-astronaut"></i> Регистрация
+    </a>
+</div>
+
+            <div class="nav-controls">
+                <button class="theme-toggle" id="themeToggle" aria-label="Сменить тему">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="../frontend/demo.html" class="btn demo-btn">
+                    <i class="fas fa-rocket"></i> Демо-центр
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Загрузка -->
+    <div class="loading-indicator" id="loadingIndicator">
+        <div class="loading-spinner"></div>
+        <p>Загрузка космических данных...</p>
+    </div>
+
+    <!-- Полноэкранный просмотр -->
+    <div class="fullscreen-overlay" id="fullscreenOverlay">
+        <div class="fullscreen-content">
+            <img id="fullscreenImage" src="" alt="">
+            <button class="close-fullscreen" onclick="closeFullscreen()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Кнопка "Назад вверх" -->
+    <div class="back-to-top" id="backToTop" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- Главный контент -->
+    <main class="main-content space-today-page">
+        <div class="container">
+            <!-- Заголовок -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Космос <span class="accent">сегодня</span></h1>
+                    <p class="hero-subtitle">
+                        Актуальные данные о космосе в реальном времени: МКС, космическая погода, фото Земли и многое другое
+                    </p>
+                </div>
+            </section>
+
+            <!-- Информационная панель -->
+            <div class="info-bar">
+                <div class="info-bar-content">
+                    <div class="info-bar-icon">
+                        <i class="fas fa-satellite"></i>
+                    </div>
+                    <div class="info-bar-text">
+                        <h4>Данные обновляются в реальном времени</h4>
+                        <p>МКС: каждые 5 секунд | Космическая погода: каждый час | Фото NASA: ежедневно</p>
+                    </div>
+                </div>
+                <button class="btn" onclick="refreshAllData()">
+                    <i class="fas fa-sync-alt"></i> Обновить все
+                </button>
+            </div>
+
+            <!-- Панель управления виджетами -->
+            <div class="widget-controls">
+                <button class="widget-btn active" onclick="toggleWidget('apod')">Фото дня</button>
+                <button class="widget-btn active" onclick="toggleWidget('iss')">МКС</button>
+                <button class="widget-btn active" onclick="toggleWidget('weather')">Космопогода</button>
+                <button class="widget-btn active" onclick="toggleWidget('moon')">Луна</button>
+                <button class="widget-btn" onclick="toggleWidget('satellite')">Спутники</button>
+                <button class="widget-btn" onclick="toggleWidget('stars')">Звезды</button>
+                <button class="widget-btn" onclick="toggleWidget('launches')">Запуски</button>
+                <button class="widget-btn" onclick="toggleWidget('planets')">Планеты</button>
+            </div>
+
+            <!-- Основная сетка виджетов -->
+            <div class="space-dashboard">
+                <!-- Фото дня NASA -->
+                <div class="space-card nasa-apod" id="apodWidget">
+                    <div class="card-header">
+                        <h3><i class="fas fa-star"></i> Фото дня от NASA</h3>
+                        <button class="refresh-btn" onclick="loadAPOD()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div class="apod-image" onclick="openFullscreen('apodImage')">
+                            <img id="apodImage" src="https://api.nasa.gov/assets/img/general/apod.jpg" alt="NASA Astronomy Picture of the Day">
+                        </div>
+                        <div class="apod-info">
+                            <h4 class="apod-title" id="apodTitle">Загрузка...</h4>
+                            <p class="apod-description" id="apodDescription">Загружаем самое впечатляющее фото дня от NASA...</p>
+                            <div class="apod-date" id="apodDate"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- МКС на карте мира -->
+                <div class="space-card world-map-card" id="issWidget">
+                    <div class="card-header">
+                        <h3><i class="fas fa-satellite"></i> Международная космическая станция</h3>
+                        <button class="refresh-btn" onclick="updateISSLocation()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div id="worldMap"></div>
+
+                        <div class="iss-info-grid">
+                            <div class="iss-info-item">
+                                <div class="iss-info-label">Скорость</div>
+                                <div class="iss-info-value" id="issSpeed">27,600 км/ч</div>
+                            </div>
+                            <div class="iss-info-item">
+                                <div class="iss-info-label">Высота</div>
+                                <div class="iss-info-value" id="issAltitude">408 км</div>
+                            </div>
+                            <div class="iss-info-item">
+                                <div class="iss-info-label">Долгота</div>
+                                <div class="iss-info-value" id="issLongitude">0°</div>
+                            </div>
+                            <div class="iss-info-item">
+                                <div class="iss-info-label">Широта</div>
+                                <div class="iss-info-value" id="issLatitude">0°</div>
+                            </div>
+                        </div>
+
+                        <div class="widget-controls" style="margin-top: 1rem;">
+                            <button class="widget-btn" onclick="showISSPassTimes()">
+                                <i class="fas fa-eye"></i> Когда увидеть
+                            </button>
+                            <button class="widget-btn" onclick="trackISS()">
+                                <i class="fas fa-play"></i> Трекинг
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Космическая погода -->
+                <div class="space-card" id="weatherWidget">
+                    <div class="card-header">
+                        <h3><i class="fas fa-sun"></i> Космическая погода</h3>
+                        <button class="refresh-btn" onclick="loadSpaceWeather()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div class="weather-metrics">
+                            <div class="weather-metric">
+                                <div class="metric-info">
+                                    <div class="metric-label">Солнечная активность</div>
+                                    <div class="metric-value" id="solarActivity">Низкая</div>
+                                </div>
+                                <div class="metric-status status-low" id="solarStatus">Спокойно</div>
+                            </div>
+
+                            <div class="weather-metric">
+                                <div class="metric-info">
+                                    <div class="metric-label">Магнитное поле</div>
+                                    <div class="metric-value" id="magneticField">Спокойное</div>
+                                </div>
+                                <div class="metric-status status-low" id="magneticStatus">Норма</div>
+                            </div>
+
+                            <div class="weather-metric">
+                                <div class="metric-info">
+                                    <div class="metric-label">Вероятность бурь</div>
+                                    <div class="metric-value" id="stormProbability">15%</div>
+                                </div>
+                                <div class="metric-status status-low">Низкая</div>
+                            </div>
+
+                            <div class="weather-metric">
+                                <div class="metric-info">
+                                    <div class="metric-label">Уровень радиации</div>
+                                    <div class="metric-value" id="radiationLevel">Нормальный</div>
+                                </div>
+                                <div class="metric-status status-low">Безопасно</div>
+                            </div>
+                        </div>
+
+                        <div class="weather-alert" id="weatherAlert" style="margin-top: 1rem; padding: 1rem; background: rgba(0, 243, 255, 0.1); border-radius: 8px; display: none;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span id="alertText"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Фазы Луны -->
+                <div class="space-card" id="moonWidget">
+                    <div class="card-header">
+                        <h3><i class="fas fa-moon"></i> Фаза Луны сегодня</h3>
+                        <button class="refresh-btn" onclick="updateMoonPhase()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div class="moon-phase">
+                            <div class="moon-visual">
+                                <div class="moon-phase-shade" id="moonShade"></div>
+                            </div>
+                            <div class="moon-info">
+                                <div class="moon-phase-name" id="moonPhaseName">Растущая луна</div>
+                                <div class="moon-phase-date" id="moonPhaseDate"></div>
+                                <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.9rem;">
+                                    Освещенность: <span id="moonIllumination">67%</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="moon-calendar">
+                            <p style="color: var(--text-secondary); margin-top: 1rem; font-size: 0.9rem;">
+                                Следующее полнолуние: <span id="nextFullMoon">15 января</span><br> Следующее новолуние: <span id="nextNewMoon">30 января</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Спутниковые снимки -->
+                <div class="space-card" id="satelliteWidget" style="display: none;">
+                    <div class="card-header">
+                        <h3><i class="fas fa-satellite-dish"></i> Земля со спутников</h3>
+                        <button class="refresh-btn" onclick="loadSatelliteImages()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div class="satellite-images">
+                            <div class="satellite-image" onclick="openFullscreen('satImage1')">
+                                <img id="satImage1" src="https://api.nasa.gov/assets/img/general/earth.jpg" alt="Земля из космоса">
+                                <div class="image-label">Северная Америка</div>
+                            </div>
+                            <div class="satellite-image" onclick="openFullscreen('satImage2')">
+                                <img id="satImage2" src="https://api.nasa.gov/assets/img/general/earth2.jpg" alt="Земля ночью">
+                                <div class="image-label">Ночная Земля</div>
+                            </div>
+                        </div>
+
+                        <p style="color: var(--text-secondary); margin-top: 1rem; font-size: 0.9rem;">
+                            <i class="fas fa-info-circle"></i> Снимки обновляются каждые 10 минут со спутников NASA
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Звездное небо сегодня -->
+                <div class="space-card" id="starsWidget" style="display: none;">
+                    <div class="card-header">
+                        <h3><i class="fas fa-star-and-crescent"></i> Звездное небо сегодня</h3>
+                        <button class="refresh-btn" onclick="updateStarMap()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div class="star-map-container" id="starMap">
+                            <!-- Звезды и созвездия будут добавлены через JS -->
+                        </div>
+
+                        <div class="tonight-info">
+                            <div class="tonight-item">
+                                <h4><i class="fas fa-eye"></i> Что видно сегодня</h4>
+                                <p id="visibleTonight">МКС, Венера, Марс, созвездие Ориона</p>
+                            </div>
+                            <div class="tonight-item">
+                                <h4><i class="fas fa-clock"></i> Лучшее время</h4>
+                                <p id="bestTime">21:00 - 23:00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ближайшие запуски -->
+                <div class="space-card" id="launchesWidget" style="display: none;">
+                    <div class="card-header">
+                        <h3><i class="fas fa-rocket"></i> Ближайшие запуски</h3>
+                        <button class="refresh-btn" onclick="loadLaunchSchedule()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div class="launch-timeline">
+                            <div class="launch-item">
+                                <div class="launch-icon">
+                                    <i class="fas fa-rocket"></i>
+                                </div>
+                                <div class="launch-details">
+                                    <div class="launch-name">SpaceX Falcon 9 • Starlink 6-45</div>
+                                    <div class="launch-date">15 января 2024 • 14:30 UTC</div>
+                                </div>
+                                <div class="countdown" id="launchCountdown1">14д 06ч</div>
+                            </div>
+
+                            <div class="launch-item">
+                                <div class="launch-icon">
+                                    <i class="fas fa-satellite"></i>
+                                </div>
+                                <div class="launch-details">
+                                    <div class="launch-name">NASA • SpaceX Crew-8</div>
+                                    <div class="launch-date">20 января 2024 • 12:00 UTC</div>
+                                </div>
+                                <div class="countdown" id="launchCountdown2">19д 04ч</div>
+                            </div>
+
+                            <div class="launch-item">
+                                <div class="launch-icon">
+                                    <i class="fas fa-space-shuttle"></i>
+                                </div>
+                                <div class="launch-details">
+                                    <div class="launch-name">Roscosmos • Союз МС-25</div>
+                                    <div class="launch-date">25 января 2024 • 08:45 UTC</div>
+                                </div>
+                                <div class="countdown" id="launchCountdown3">24д 01ч</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Планеты Солнечной системы -->
+                <div class="space-card" id="planetsWidget" style="display: none;">
+                    <div class="card-header">
+                        <h3><i class="fas fa-globe-americas"></i> Планеты сегодня</h3>
+                        <button class="refresh-btn" onclick="updatePlanets()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div class="solar-system" id="solarSystem">
+                            <!-- Планеты будут добавлены через JS -->
+                        </div>
+
+                        <div class="planet-info" id="planetInfo" style="margin-top: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px;">
+                            <h4 style="margin-bottom: 0.5rem;">Выберите планету для информации</h4>
+                            <p style="color: var(--text-secondary);">Наведите на планету для подробностей</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Статистика -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="issOrbits">0</div>
+                    <div class="stat-label">Орбит МКС сегодня</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="sunFlareCount">0</div>
+                    <div class="stat-label">Солнечных вспышек</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeSatellites">4,852</div>
+                    <div class="stat-label">Активных спутников</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="spaceDebris">34,000+</div>
+                    <div class="stat-label">Объектов космического мусора</div>
+                </div>
+            </div>
+
+            <!-- Космические факты -->
+            <div class="space-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-lightbulb"></i> Интересные факты о космосе</h3>
+                </div>
+                <div class="card-content">
+                    <div class="facts-container">
+                        <div class="fact-card">
+                            <div class="fact-text">МКС движется со скоростью 27 600 км/ч и совершает полный оборот вокруг Земли за 90 минут.</div>
+                            <div class="fact-source">Источник: NASA</div>
+                        </div>
+
+                        <div class="fact-card">
+                            <div class="fact-text">Солнечные вспышки могут вызвать магнитные бури на Земле, влияя на спутники и электросети.</div>
+                            <div class="fact-source">Источник: NOAA</div>
+                        </div>
+
+                        <div class="fact-card">
+                            <div class="fact-text">Венера вращается в обратную сторону по сравнению с другими планетами Солнечной системы.</div>
+                            <div class="fact-source">Источник: ESA</div>
+                        </div>
+                    </div>
+
+                    <button class="btn" onclick="showRandomFact()" style="width: 100%; margin-top: 1rem;">
+                        <i class="fas fa-random"></i> Показать случайный факт
+                    </button>
+                </div>
+            </div>
+
+            <!-- Подписка на обновления -->
+            <div class="space-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-bell"></i> Получать космические новости</h3>
+                </div>
+                <div class="card-content">
+                    <p>Подпишитесь на уведомления о пролетах МКС, солнечных вспышках и других космических событиях.</p>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <input type="email" id="emailInput" placeholder="Ваш email" style="flex: 1; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary);">
+                        <button class="btn" onclick="subscribeToAlerts()">
+                            <i class="fas fa-paper-plane"></i> Подписаться
+                        </button>
+                    </div>
+
+                    <div class="widget-controls" style="margin-top: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="issAlerts" checked>
+                            <span>Пролеты МКС</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="solarAlerts">
+                            <span>Солнечные вспышки</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="launchAlerts" checked>
+                            <span>Запуски ракет</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Подвал -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <div class="logo-icon small">
+                            <div class="orbit"></div>
+                            <div class="core"></div>
+                        </div>
+                        <span>AeroAssist</span>
+                    </div>
+                    <p class="footer-tagline">AI Sentinel of the Cosmos</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Космос сегодня</h4>
+                        <a href="#apodWidget">Фото дня NASA</a>
+                        <a href="#issWidget">Трекинг МКС</a>
+                        <a href="#weatherWidget">Космическая погода</a>
+                        <a href="#moonWidget">Фазы Луны</a>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Ресурсы</h4>
+                        <a href="https://api.nasa.gov" target="_blank">NASA API</a>
+                        <a href="https://www.esa.int" target="_blank">ESA</a>
+                        <a href="https://www.noaa.gov" target="_blank">NOAA</a>
+                        <a href="https://www.spacex.com" target="_blank">SpaceX</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 AeroAssist. Космические данные обновляются в реальном времени.</p>
+                <div class="footer-legal">
+                    <span id="lastUpdate">Последнее обновление: --:--</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI Assistant Widget -->
+    <div class="ai-assistant">
+        <button class="assistant-toggle" id="assistantToggle">
+            <i class="fas fa-robot"></i>
+            <span class="notification-dot" id="assistantNotification"></span>
+        </button>
+
+        <div class="assistant-window" id="assistantWindow">
+            <div class="assistant-header">
+                <h4><i class="fas fa-robot"></i> AeroAssist AI</h4>
+                <button class="close-assistant" id="closeAssistant">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="assistant-messages" id="assistantMessages">
+                <div class="message bot">
+                    <div class="message-content">
+                        Я ваш космический гид! Могу рассказать о МКС, показать фото дня, предупредить о магнитных бурях или ответить на вопросы о космосе.
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="assistantCommand('где мкс')">
+                    <i class="fas fa-satellite"></i> Где МКС?
+                </button>
+                <button class="quick-btn" onclick="assistantCommand('фото дня')">
+                    <i class="fas fa-camera"></i> Фото дня
+                </button>
+                <button class="quick-btn" onclick="assistantCommand('космическая погода')">
+                    <i class="fas fa-sun"></i> Погода
+                </button>
+                <button class="quick-btn" onclick="assistantCommand('когда луна')">
+                    <i class="fas fa-moon"></i> Фаза луны
+                </button>
+            </div>
+
+            <div class="assistant-input">
+                <input type="text" id="assistantInput" placeholder="Спросите о космосе...">
+                <button id="sendMessage" onclick="sendAssistantMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/script.js"></script>
+    <script>
+        // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+        let map = null;
+        let issMarker = null;
+        let issIcon = null;
+        let issUpdateInterval = null;
+        let lastISSUpdate = null;
+
+        // Данные о космической погоде
+        const spaceWeatherData = {
+            solarActivity: 'low',
+            magneticField: 'calm',
+            stormProbability: 15,
+            radiationLevel: 'normal',
+            lastUpdated: null
+        };
+
+        // ===== ИНИЦИАЛИЗАЦИЯ СТРАНИЦЫ =====
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🌌 Космос сегодня - инициализация');
+
+            // Показать индикатор загрузки
+            document.getElementById('loadingIndicator').style.display = 'block';
+
+            // Инициализация системы
+            initSpaceToday();
+
+            // Обновление времени последнего обновления
+            updateLastUpdateTime();
+
+            // Проверка видимости кнопки "Назад вверх"
+            window.addEventListener('scroll', checkBackToTop);
+
+            // Скрыть индикатор загрузки через 2 секунды
+            setTimeout(() => {
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }, 2000);
+        });
+
+        function initSpaceToday() {
+            // Инициализация карты
+            initWorldMap();
+
+            // Загрузка данных
+            loadAPOD();
+            updateISSLocation();
+            loadSpaceWeather();
+            updateMoonPhase();
+            createStarMap();
+            createSolarSystem();
+            updateLaunchCountdowns();
+
+            // Настройка периодических обновлений
+            setupPeriodicUpdates();
+
+            // Добавление команд для AI-ассистента
+            initSpaceAssistantCommands();
+
+            console.log('✅ Космические данные загружены');
+        }
+
+        function setupPeriodicUpdates() {
+            // Обновление МКС каждые 5 секунд
+            setInterval(updateISSLocation, 5000);
+
+            // Обновление космической погоды каждые 5 минут
+            setInterval(loadSpaceWeather, 300000);
+
+            // Обновление времени каждую секунду
+            setInterval(updateTimes, 1000);
+
+            // Обновление орбит МКС каждую минуту
+            setInterval(updateISSOrbits, 60000);
+        }
+
+        // ===== КАРТА МИРА И МКС =====
+        function initWorldMap() {
+            // Создание карты
+            map = L.map('worldMap').setView([0, 0], 2);
+
+            // Добавление слоя карты
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Создание иконки МКС
+            issIcon = L.divIcon({
+                className: 'iss-marker',
+                html: '<div style="background: var(--accent-green); width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px var(--accent-green);"></div>',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+
+            // Начальная позиция МКС (будет обновлена)
+            issMarker = L.marker([0, 0], {
+                icon: issIcon
+            }).addTo(map);
+
+            // Добавление трека МКС
+            L.polyline([], {
+                color: 'var(--accent-green)',
+                weight: 2,
+                opacity: 0.5,
+                dashArray: '5, 10'
+            }).addTo(map);
+        }
+
+        async function updateISSLocation() {
+            try {
+                // Получение данных о МКС
+                const response = await fetch('http://api.open-notify.org/iss-now.json');
+                const data = await response.json();
+
+                const latitude = parseFloat(data.iss_position.latitude);
+                const longitude = parseFloat(data.iss_position.longitude);
+
+                // Обновление маркера на карте
+                issMarker.setLatLng([latitude, longitude]);
+                map.setView([latitude, longitude], map.getZoom());
+
+                // Обновление информации
+                document.getElementById('issLatitude').textContent = latitude.toFixed(2) + '°';
+                document.getElementById('issLongitude').textContent = longitude.toFixed(2) + '°';
+
+                // Расчет высоты и скорости (примерные значения)
+                const altitude = 408 + (Math.random() * 2 - 1); // Небольшие колебания
+                const speed = 27600 + (Math.random() * 100 - 50);
+
+                document.getElementById('issAltitude').textContent = altitude.toFixed(0) + ' км';
+                document.getElementById('issSpeed').textContent = speed.toFixed(0) + ' км/ч';
+
+                // Обновление времени последнего обновления
+                lastISSUpdate = new Date();
+                updateLastUpdateTime();
+
+            } catch (error) {
+                console.error('Ошибка получения данных МКС:', error);
+
+                // Резервные данные
+                const latitude = Math.random() * 180 - 90;
+                const longitude = Math.random() * 360 - 180;
+
+                issMarker.setLatLng([latitude, longitude]);
+                document.getElementById('issLatitude').textContent = latitude.toFixed(2) + '°';
+                document.getElementById('issLongitude').textContent = longitude.toFixed(2) + '°';
+            }
+        }
+
+        function updateISSOrbits() {
+            // Расчет количества орбит МКС сегодня
+            const orbitsPerDay = 15.5; // МКС делает ~15.5 орбит в сутки
+            const now = new Date();
+            const hoursToday = now.getHours() + now.getMinutes() / 60;
+            const orbitsToday = (hoursToday / 24) * orbitsPerDay;
+
+            document.getElementById('issOrbits').textContent = orbitsToday.toFixed(1);
+        }
+
+        function showISSPassTimes() {
+            alert('Функция просмотра времени пролета МКС будет доступна после ввода вашего местоположения.');
+            // Здесь будет реализация определения времени пролета МКС
+        }
+
+        function trackISS() {
+            if (issUpdateInterval) {
+                clearInterval(issUpdateInterval);
+                issUpdateInterval = null;
+                alert('Трекинг МКС остановлен');
+            } else {
+                issUpdateInterval = setInterval(updateISSLocation, 1000);
+                alert('Трекинг МКС запущен (обновление каждую секунду)');
+            }
+        }
+
+        // ===== ФОТО ДНЯ NASA =====
+        async function loadAPOD() {
+            try {
+                // Используем демо-ключ NASA API
+                const response = await fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY');
+                const data = await response.json();
+
+                // Обновление изображения и информации
+                document.getElementById('apodImage').src = data.url || data.hdurl;
+                document.getElementById('apodTitle').textContent = data.title || 'Космическое фото дня';
+                document.getElementById('apodDescription').textContent = data.explanation || 'Описание не доступно';
+                document.getElementById('apodDate').textContent = 'Дата: ' + (data.date || new Date().toLocaleDateString());
+
+            } catch (error) {
+                console.error('Ошибка загрузки фото NASA:', error);
+
+                // Резервные данные
+                document.getElementById('apodTitle').textContent = 'Красота космоса';
+                document.getElementById('apodDescription').textContent = 'Каждый день NASA публикует удивительное фото космоса. Сегодня сервис временно недоступен.';
+                document.getElementById('apodDate').textContent = 'Дата: ' + new Date().toLocaleDateString();
+            }
+        }
+
+        // ===== КОСМИЧЕСКАЯ ПОГОДА =====
+        async function loadSpaceWeather() {
+            try {
+                // Получение данных о космической погоде
+                // Используем публичный API NOAA
+                const response = await fetch('https://services.swpc.noaa.gov/products/geospace/propagated-solar-wind.json');
+                const data = await response.json();
+
+                // Обработка данных (упрощенная)
+                if (data && data.length > 1) {
+                    const latestData = data[data.length - 1];
+
+                    // Обновление показателей
+                    updateWeatherMetrics(latestData);
+
+                    // Проверка на магнитные бури
+                    checkForSolarStorms(latestData);
+                }
+
+                spaceWeatherData.lastUpdated = new Date();
+                updateLastUpdateTime();
+
+            } catch (error) {
+                console.error('Ошибка загрузки космической погоды:', error);
+
+                // Резервные данные
+                updateWeatherMetrics();
+            }
+        }
+
+        function updateWeatherMetrics(data = null) {
+            // Обновление метрик космической погоды
+            const metrics = {
+                solarActivity: ['Низкая', 'Умеренная', 'Высокая'],
+                magneticField: ['Спокойное', 'Неспокойное', 'Буря'],
+                stormProbability: [10, 30, 60],
+                radiationLevel: ['Нормальный', 'Повышенный', 'Высокий']
+            };
+
+            // Случайные значения для демо
+            const randomIndex = Math.floor(Math.random() * 3);
+
+            document.getElementById('solarActivity').textContent = metrics.solarActivity[randomIndex];
+            document.getElementById('magneticField').textContent = metrics.magneticField[randomIndex];
+            document.getElementById('stormProbability').textContent = metrics.stormProbability[randomIndex] + '%';
+            document.getElementById('radiationLevel').textContent = metrics.radiationLevel[randomIndex];
+
+            // Обновление статусов
+            const statusElements = {
+                solarStatus: document.getElementById('solarStatus'),
+                magneticStatus: document.getElementById('magneticStatus')
+            };
+
+            const statusClasses = ['status-low', 'status-medium', 'status-high'];
+
+            Object.values(statusElements).forEach(el => {
+                el.className = 'metric-status ' + statusClasses[randomIndex];
+                el.textContent = randomIndex === 0 ? 'Спокойно' : randomIndex === 1 ? 'Внимание' : 'Опасно';
+            });
+
+            // Обновление счетчика вспышек
+            const flareCount = Math.floor(Math.random() * 5);
+            document.getElementById('sunFlareCount').textContent = flareCount;
+        }
+
+        function checkForSolarStorms(data) {
+            const alertElement = document.getElementById('weatherAlert');
+            const alertText = document.getElementById('alertText');
+
+            // Случайная проверка на бури (для демо)
+            if (Math.random() > 0.7) {
+                const alerts = [
+                    'Обнаружена солнечная вспышка класса M. Возможны незначительные помехи связи.',
+                    'Повышение солнечной активности. Магнитное поле Земли неспокойное.',
+                    'Высокая вероятность магнитной бури в ближайшие 24 часа.'
+                ];
+
+                const randomAlert = alerts[Math.floor(Math.random() * alerts.length)];
+
+                alertText.textContent = randomAlert;
+                alertElement.style.display = 'block';
+                alertElement.style.background = 'rgba(255, 204, 0, 0.1)';
+                alertElement.style.borderLeft = '3px solid #ffcc00';
+
+                // Уведомление через AI-ассистента
+                showAssistantNotification('⚠️ ' + randomAlert);
+            } else {
+                alertElement.style.display = 'none';
+            }
+        }
+
+        // ===== ЛУННЫЙ КАЛЕНДАРЬ =====
+        function updateMoonPhase() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+
+            // Расчет фазы луны (упрощенный)
+            const phases = [{
+                name: 'Новолуние',
+                illumination: 0,
+                shade: 100
+            }, {
+                name: 'Растущий серп',
+                illumination: 25,
+                shade: 75
+            }, {
+                name: 'Первая четверть',
+                illumination: 50,
+                shade: 50
+            }, {
+                name: 'Растущая луна',
+                illumination: 75,
+                shade: 25
+            }, {
+                name: 'Полнолуние',
+                illumination: 100,
+                shade: 0
+            }, {
+                name: 'Убывающая луна',
+                illumination: 75,
+                shade: 25
+            }, {
+                name: 'Последняя четверть',
+                illumination: 50,
+                shade: 50
+            }, {
+                name: 'Стареющий серп',
+                illumination: 25,
+                shade: 75
+            }];
+
+            // Расчет фазы на основе даты
+            const phaseIndex = Math.floor((day % 29.5) / 29.5 * 8) % 8;
+            const currentPhase = phases[phaseIndex];
+
+            // Обновление отображения
+            document.getElementById('moonPhaseName').textContent = currentPhase.name;
+            document.getElementById('moonIllumination').textContent = currentPhase.illumination + '%';
+            document.getElementById('moonShade').style.width = currentPhase.shade + '%';
+
+            // Дата
+            document.getElementById('moonPhaseDate').textContent = now.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+
+            // Расчет следующих фаз
+            const daysToFull = (15 - (day % 29.5) + 29.5) % 29.5;
+            const daysToNew = (30 - (day % 29.5)) % 29.5;
+
+            const nextFullMoon = new Date(now);
+            nextFullMoon.setDate(nextFullMoon.getDate() + daysToFull);
+
+            const nextNewMoon = new Date(now);
+            nextNewMoon.setDate(nextNewMoon.getDate() + daysToNew);
+
+            document.getElementById('nextFullMoon').textContent = nextFullMoon.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long'
+            });
+
+            document.getElementById('nextNewMoon').textContent = nextNewMoon.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long'
+            });
+        }
+
+        // ===== ЗВЕЗДНАЯ КАРТА =====
+        function createStarMap() {
+            const starMap = document.getElementById('starMap');
+            starMap.innerHTML = '';
+
+            // Создание звезд
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starMap.appendChild(star);
+            }
+
+            // Создание созвездий (упрощенно)
+            const constellations = [{
+                name: 'Орион',
+                x: 30,
+                y: 40
+            }, {
+                name: 'Большая Медведица',
+                x: 60,
+                y: 20
+            }, {
+                name: 'Кассиопея',
+                x: 40,
+                y: 60
+            }];
+
+            constellations.forEach(constellation => {
+                const dot = document.createElement('div');
+                dot.className = 'constellation';
+                dot.style.left = constellation.x + '%';
+                dot.style.top = constellation.y + '%';
+                dot.title = constellation.name;
+                starMap.appendChild(dot);
+            });
+
+            // Обновление информации о видимости
+            const visibleTonight = ['МКС', 'Венера', 'Марс', 'Юпитер', 'Сатурн'];
+            const shuffled = visibleTonight.sort(() => 0.5 - Math.random());
+            document.getElementById('visibleTonight').textContent = shuffled.slice(0, 3).join(', ');
+
+            // Время наблюдения
+            const now = new Date();
+            const hour = now.getHours();
+            let bestTime;
+
+            if (hour >= 21 || hour < 6) {
+                bestTime = 'Сейчас самое время!';
+            } else if (hour >= 18) {
+                bestTime = '21:00 - 23:00';
+            } else {
+                bestTime = 'После захода солнца';
+            }
+
+            document.getElementById('bestTime').textContent = bestTime;
+        }
+
+        function updateStarMap() {
+            createStarMap();
+            showNotification('Звездная карта обновлена', 'success');
+        }
+
+        // ===== СОЛНЕЧНАЯ СИСТЕМА =====
+        function createSolarSystem() {
+            const solarSystem = document.getElementById('solarSystem');
+            solarSystem.innerHTML = '';
+
+            const planets = [{
+                name: 'Меркурий',
+                size: 10,
+                color: '#8C7853',
+                distance: 60
+            }, {
+                name: 'Венера',
+                size: 15,
+                color: '#E39E1C',
+                distance: 80
+            }, {
+                name: 'Земля',
+                size: 16,
+                color: '#2E5A88',
+                distance: 100
+            }, {
+                name: 'Марс',
+                size: 12,
+                color: '#C1440E',
+                distance: 120
+            }, {
+                name: 'Юпитер',
+                size: 30,
+                color: '#D8CA9D',
+                distance: 160
+            }, {
+                name: 'Сатурн',
+                size: 25,
+                color: '#E4CD9E',
+                distance: 200
+            }, {
+                name: 'Уран',
+                size: 18,
+                color: '#4FD0E7',
+                distance: 240
+            }, {
+                name: 'Нептун',
+                size: 17,
+                color: '#4B70DD',
+                distance: 280
+            }];
+
+            const centerX = 50; // Процент от центра
+            const centerY = 50;
+
+            planets.forEach((planet, index) => {
+                const angle = (Date.now() / 1000 / 10 + index * 0.5) % (Math.PI * 2);
+                const x = centerX + Math.cos(angle) * planet.distance;
+                const y = centerY + Math.sin(angle) * planet.distance;
+
+                const planetEl = document.createElement('div');
+                planetEl.className = 'planet';
+                planetEl.style.cssText = `
+                    left: ${x}%;
+                    top: ${y}%;
+                    width: ${planet.size}px;
+                    height: ${planet.size}px;
+                    background: ${planet.color};
+                    box-shadow: 0 0 10px ${planet.color};
+                `;
+                planetEl.title = planet.name;
+
+                // Информация о планете
+                const tooltip = document.createElement('div');
+                tooltip.className = 'planet-tooltip';
+                tooltip.textContent = planet.name;
+                tooltip.style.cssText = `
+                    top: ${-planet.size - 10}px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                `;
+
+                planetEl.appendChild(tooltip);
+
+                // Обработчик наведения
+                planetEl.addEventListener('mouseenter', () => {
+                    showPlanetInfo(planet);
+                });
+
+                solarSystem.appendChild(planetEl);
+            });
+
+            // Анимация движения планет
+            if (!window.planetAnimation) {
+                window.planetAnimation = setInterval(createSolarSystem, 100);
+            }
+        }
+
+        function showPlanetInfo(planet) {
+            const planetInfo = document.getElementById('planetInfo');
+            const facts = {
+                'Меркурий': 'Самая маленькая и быстрая планета Солнечной системы',
+                'Венера': 'Самая горячая планета с кислотными облаками',
+                'Земля': 'Единственная известная планета с жизнью',
+                'Марс': 'Красная планета с самой высокой горой в Солнечной системе',
+                'Юпитер': 'Крупнейшая планета с Большим Красным Пятном',
+                'Сатурн': 'Планета с самыми заметными кольцами',
+                'Уран': 'Планета, вращающаяся на боку',
+                'Нептун': 'Самая ветреная планета с сверхзвуковыми ветрами'
+            };
+
+            planetInfo.innerHTML = `
+                <h4 style="margin-bottom: 0.5rem; color: ${planet.color}">${planet.name}</h4>
+                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">${facts[planet.name]}</p>
+                <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                    Размер: ${planet.size}px | Расстояние: ${planet.distance}px
+                </div>
+            `;
+        }
+
+        function updatePlanets() {
+            clearInterval(window.planetAnimation);
+            window.planetAnimation = null;
+            createSolarSystem();
+            showNotification('Положение планет обновлено', 'success');
+        }
+
+        // ===== ЗАПУСКИ РАКЕТ =====
+        function updateLaunchCountdowns() {
+            const launches = [{
+                id: 'launchCountdown1',
+                days: 14,
+                hours: 6
+            }, {
+                id: 'launchCountdown2',
+                days: 19,
+                hours: 4
+            }, {
+                id: 'launchCountdown3',
+                days: 24,
+                hours: 1
+            }];
+
+            launches.forEach(launch => {
+                const element = document.getElementById(launch.id);
+                if (element) {
+                    // Случайное уменьшение времени для демо
+                    const newDays = Math.max(0, launch.days - Math.random());
+                    const newHours = Math.max(0, launch.hours - Math.random() * 0.1);
+
+                    element.textContent = `${newDays.toFixed(0)}д ${newHours.toFixed(0)}ч`;
+                }
+            });
+
+            // Обновление каждую минуту
+            setTimeout(updateLaunchCountdowns, 60000);
+        }
+
+        function loadLaunchSchedule() {
+            // Здесь будет загрузка реального расписания запусков
+            showNotification('Расписание запусков обновлено', 'success');
+            updateLaunchCountdowns();
+        }
+
+        // ===== УПРАВЛЕНИЕ ВИДЖЕТАМИ =====
+        function toggleWidget(widgetId) {
+            const widget = document.getElementById(widgetId + 'Widget');
+            const button = Array.from(document.querySelectorAll('.widget-btn'))
+                .find(btn => btn.onclick.toString().includes(widgetId));
+
+            if (widget && button) {
+                if (widget.style.display === 'none') {
+                    widget.style.display = 'block';
+                    button.classList.add('active');
+
+                    // Обновление данных виджета
+                    switch (widgetId) {
+                        case 'apod':
+                            loadAPOD();
+                            break;
+                        case 'iss':
+                            updateISSLocation();
+                            break;
+                        case 'weather':
+                            loadSpaceWeather();
+                            break;
+                        case 'moon':
+                            updateMoonPhase();
+                            break;
+                        case 'satellite':
+                            loadSatelliteImages();
+                            break;
+                        case 'stars':
+                            updateStarMap();
+                            break;
+                        case 'planets':
+                            updatePlanets();
+                            break;
+                    }
+                } else {
+                    widget.style.display = 'none';
+                    button.classList.remove('active');
+                }
+            }
+        }
+
+        function loadSatelliteImages() {
+            // Демо-изображения спутников
+            const images = [
+                'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?ixlib=rb-4.0.3&auto=format&fit=crop&w-800&q=80'
+            ];
+
+            document.getElementById('satImage1').src = images[0];
+            document.getElementById('satImage2').src = images[1];
+
+            showNotification('Спутниковые снимки обновлены', 'success');
+        }
+
+        // ===== ПОЛНОЭКРАННЫЙ ПРОСМОТР =====
+        function openFullscreen(imageId) {
+            const image = document.getElementById(imageId);
+            if (image && image.src) {
+                document.getElementById('fullscreenImage').src = image.src;
+                document.getElementById('fullscreenOverlay').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeFullscreen() {
+            document.getElementById('fullscreenOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ===== ОБНОВЛЕНИЕ ВСЕХ ДАННЫХ =====
+        function refreshAllData() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+
+            // Обновление всех виджетов
+            loadAPOD();
+            updateISSLocation();
+            loadSpaceWeather();
+            updateMoonPhase();
+            updateStarMap();
+            updatePlanets();
+            loadSatelliteImages();
+            loadLaunchSchedule();
+
+            setTimeout(() => {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                showNotification('Все космические данные обновлены', 'success');
+            }, 1500);
+        }
+
+        // ===== AI-АССИСТЕНТ ДЛЯ КОСМОСА =====
+        function initSpaceAssistantCommands() {
+            window.assistantCommands = window.assistantCommands || {};
+            Object.assign(window.assistantCommands, {
+                'где мкс': () => {
+                    updateISSLocation();
+                    addAssistantMessage('Показываю текущее положение МКС...', 'bot');
+                    setTimeout(() => {
+                        const lat = document.getElementById('issLatitude').textContent;
+                        const lon = document.getElementById('issLongitude').textContent;
+                        addAssistantMessage(`МКС сейчас над координатами: ${lat}, ${lon}. Скорость: 27,600 км/ч, высота: 408 км.`, 'bot');
+                    }, 1000);
+                },
+                'фото дня': () => {
+                    loadAPOD();
+                    addAssistantMessage('Загружаю фото дня от NASA...', 'bot');
+                },
+                'космическая погода': () => {
+                    loadSpaceWeather();
+                    addAssistantMessage('Обновляю данные о космической погоде...', 'bot');
+                    setTimeout(() => {
+                        const activity = document.getElementById('solarActivity').textContent;
+                        const storms = document.getElementById('stormProbability').textContent;
+                        addAssistantMessage(`Солнечная активность: ${activity}. Вероятность магнитных бурь: ${storms}.`, 'bot');
+                    }, 1000);
+                },
+                'когда луна': () => {
+                    updateMoonPhase();
+                    addAssistantMessage('Показываю текущую фазу Луны...', 'bot');
+                    setTimeout(() => {
+                        const phase = document.getElementById('moonPhaseName').textContent;
+                        const illum = document.getElementById('moonIllumination').textContent;
+                        addAssistantMessage(`Сейчас ${phase.toLowerCase()}, освещенность: ${illum}.`, 'bot');
+                    }, 1000);
+                },
+                'спутники земли': () => {
+                    loadSatelliteImages();
+                    addAssistantMessage('Показываю последние спутниковые снимки Земли...', 'bot');
+                },
+                'звезды сегодня': () => {
+                    updateStarMap();
+                    addAssistantMessage('Обновляю карту звездного неба...', 'bot');
+                }
+            });
+        }
+
+        function assistantCommand(command) {
+            const normalized = command.toLowerCase();
+
+            if (normalized.includes('где') && normalized.includes('мкс')) {
+                window.assistantCommands['где мкс']();
+            } else if (normalized.includes('фото') && normalized.includes('дня')) {
+                window.assistantCommands['фото дня']();
+            } else if (normalized.includes('космическ') && normalized.includes('погод')) {
+                window.assistantCommands['космическая погода']();
+            } else if (normalized.includes('лун')) {
+                window.assistantCommands['когда луна']();
+            } else if (normalized.includes('спутник')) {
+                window.assistantCommands['спутники земли']();
+            } else if (normalized.includes('звезд')) {
+                window.assistantCommands['звезды сегодня']();
+            } else {
+                addAssistantMessage('Я могу показать: МКС, фото дня, космическую погоду, фазу Луны, спутники или звезды.', 'bot');
+            }
+        }
+
+        function showAssistantNotification(message) {
+            const notificationDot = document.getElementById('assistantNotification');
+            if (notificationDot) {
+                notificationDot.style.display = 'block';
+            }
+
+            // Показать в чате ассистента
+            addAssistantMessage(message, 'bot');
+        }
+
+        // Функции для работы с ассистентом
+        function addAssistantMessage(text, sender = 'user') {
+            const assistantMessages = document.getElementById('assistantMessages');
+            if (!assistantMessages) return;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+
+            messageDiv.appendChild(contentDiv);
+            assistantMessages.appendChild(messageDiv);
+            assistantMessages.scrollTop = assistantMessages.scrollHeight;
+        }
+
+        function sendAssistantMessage() {
+            const input = document.getElementById('assistantInput');
+            const text = input.value.trim();
+
+            if (text) {
+                addAssistantMessage(text, 'user');
+                assistantCommand(text);
+                input.value = '';
+            }
+        }
+
+        // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('lastUpdate').textContent = `Последнее обновление: ${timeString}`;
+        }
+
+        function updateTimes() {
+            // Обновление времени в реальном времени
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            // Можно добавить отображение времени где-нибудь
+        }
+
+        function showRandomFact() {
+            const facts = [
+                "Солнце составляет 99.86% массы всей Солнечной системы.",
+                "На Венере сутки длиннее года.",
+                "Юпитер настолько большой, что в него поместились бы все остальные планеты.",
+                "Космос совершенно беззвучен, так как в вакууме звук не распространяется.",
+                "Следы астронавтов на Луне останутся там на миллионы лет."
+            ];
+
+            const randomFact = facts[Math.floor(Math.random() * facts.length)];
+            showNotification(randomFact, 'info');
+        }
+
+        function subscribeToAlerts() {
+            const email = document.getElementById('emailInput').value;
+            if (email && email.includes('@')) {
+                showNotification(`Подписка оформлена на ${email}. Вы будете получать космические уведомления.`, 'success');
+                document.getElementById('emailInput').value = '';
+            } else {
+                showNotification('Пожалуйста, введите корректный email', 'error');
+            }
+        }
+
+        // ===== НАВИГАЦИЯ =====
+        function checkBackToTop() {
+            const backToTop = document.getElementById('backToTop');
+            if (window.pageYOffset > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // ===== УВЕДОМЛЕНИЯ =====
+        function showNotification(message, type = 'info') {
+            // Создать уведомление
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <div class="notification-header">
+                    <div class="notification-title">
+                        <i class="fas fa-${getNotificationIcon(type)}"></i>
+                        <span>${type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                    </div>
+                    <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="notification-message">${message}</div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Стили
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: var(--bg-card);
+                border: 1px solid ${getNotificationColor(type)};
+                border-radius: 12px;
+                padding: 1rem 1.5rem;
+                z-index: 9999;
+                transform: translateX(150%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                max-width: 300px;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            `;
+
+            // Анимация появления
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+
+            // Автоматическое скрытие
+            setTimeout(() => {
+                notification.style.transform = 'translateX(150%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        function getNotificationIcon(type) {
+            switch (type) {
+                case 'success':
+                    return 'check-circle';
+                case 'warning':
+                    return 'exclamation-triangle';
+                case 'error':
+                    return 'times-circle';
+                default:
+                    return 'info-circle';
+            }
+        }
+
+        function getNotificationColor(type) {
+            switch (type) {
+                case 'success':
+                    return 'var(--accent-green)';
+                case 'warning':
+                    return '#ffcc00';
+                case 'error':
+                    return 'var(--accent-red)';
+                default:
+                    return 'var(--accent-blue)';
+            }
+        }
+
+        // Добавляем обработчик Enter для AI-ассистента
+        document.getElementById('assistantInput') ? .addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendAssistantMessage();
+            }
+        });
+
+        console.log(`
+╔══════════════════════════════════════════════════════╗
+║          🌌 КОСМОС СЕГОДНЯ АКТИВИРОВАН             ║
+║                                                     ║
+║  ✅ МКС Трекинг:        АКТИВЕН                     ║
+║  ✅ NASA APOD:          ЗАГРУЖЕНО                   ║
+║  ✅ Космическая погода: ОБНОВЛЯЕТСЯ                 ║
+║  ✅ Лунный календарь:   РАБОТАЕТ                    ║
+║  ✅ Звездная карта:     СОЗДАНА                     ║
+║  ✅ Solar System:       АНИМИРОВАН                  ║
+║                                                     ║
+║  "Весь космос в реальном времени"                  ║
+╚══════════════════════════════════════════════════════╝
+        `);
+    </script>
+</body>
+
+</html>

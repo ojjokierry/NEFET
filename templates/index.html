@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroAssist | AI Sentinel of the Cosmos</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+</head>
+
+<body class="night-theme">
+
+    <!-- Частицы на фоне -->
+    <div id="particles"></div>
+
+    <!-- Навигация -->
+    <div class="nav-menu" id="navMenu">
+    <a href="/" class="nav-link active">
+        <i class="fas fa-home"></i> Главная
+    </a>
+    <a href="/capabilities" class="nav-link">
+        <i class="fas fa-satellite"></i> Возможности
+    </a>
+    <a href="/demo" class="nav-link">
+        <i class="fas fa-play-circle"></i> Демо
+    </a>
+    <a href="/space-today" class="nav-link">
+        <i class="fas fa-globe-americas"></i> Космос
+    </a>
+    <a href="/registration" class="nav-link">
+        <i class="fas fa-user-astronaut"></i> Регистрация
+    </a>
+</div>
+            <div class="nav-controls">
+                <button class="theme-toggle" id="themeToggle" aria-label="Сменить тему">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="../frontend/demo.html" class="btn demo-btn">
+                    <i class="fas fa-rocket"></i> Попробовать
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Главный контент -->
+    <main class="main-content">
+
+        <!-- Герой-секция -->
+        <section class="hero-section">
+            <div class="hero-background">
+                <div class="earth-model">
+                    <div class="earth"></div>
+                    <div class="orbit-ring"></div>
+                </div>
+            </div>
+
+            <div class="hero-content">
+                <div class="hero-badge">AI-POWERED COSMIC SENTINEL</div>
+                <h1 class="hero-title">
+                    <span class="title-line">AERO</span>
+                    <span class="title-line accent">ASSIST</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Один ИИ — два мира: профессиональная космическая безопасность<br> и публичный доступ к космосу для всех
+                </p>
+
+                <div class="hero-buttons">
+                    <a href="../frontend/demo.html" class="btn primary-btn">
+                        <i class="fas fa-play"></i> Запустить демо
+                    </a>
+                    <a href="#about" class="btn secondary-btn">
+                        <i class="fas fa-info-circle"></i> Узнать больше
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- О проекте -->
+        <section id="about" class="about-section">
+            <div class="container">
+                <h2 class="section-title">Что такое <span class="accent">AeroAssist?</span></h2>
+
+                <div class="about-grid">
+                    <div class="about-card">
+                        <div class="about-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Безопасность</h3>
+                        <p>ИИ-мониторинг ракет, скафандров и космических аппаратов в реальном времени</p>
+                    </div>
+
+                    <div class="about-card">
+                        <div class="about-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h3>Наблюдение</h3>
+                        <p>Компьютерное зрение для обнаружения аномалий и предупреждения сбоев</p>
+                    </div>
+
+                    <div class="about-card">
+                        <div class="about-icon">
+                            <i class="fas fa-satellite"></i>
+                        </div>
+                        <h3>Доступность</h3>
+                        <p>Публичный доступ к спутниковым данным, МКС и космической погоде</p>
+                    </div>
+
+                    <div class="about-card">
+                        <div class="about-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>AI Copilot</h3>
+                        <p>Интеллектуальный помощник для космических операций и ответов на вопросы</p>
+                    </div>
+                </div>
+
+                <div class="mission-statement">
+                    <h3>Наша миссия</h3>
+                    <p>
+                        Сделать космические миссии безопаснее с помощью искусственного интеллекта, одновременно открывая красоту космоса для обычных людей. Мы создаем мост между профессиональной космонавтикой и общественным интересом к космосу.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Два мира - одна платформа -->
+        <section class="worlds-section">
+            <div class="container">
+                <h2 class="section-title">Один ИИ — <span class="accent">два мира</span></h2>
+
+                <div class="worlds-split">
+                    <div class="world-card pro-world">
+                        <div class="world-header">
+                            <h3><i class="fas fa-user-tie"></i> Pro Mode</h3>
+                            <div class="world-badge">Для профессионалов</div>
+                        </div>
+                        <div class="world-content">
+                            <ul>
+                                <li><i class="fas fa-check"></i> Обнаружение трещин в материалах</li>
+                                <li><i class="fas fa-check"></i> Проверка скафандров</li>
+                                <li><i class="fas fa-check"></i> Медицинский мониторинг</li>
+                                <li><i class="fas fa-check"></i> Анализ аномалий</li>
+                            </ul>
+                            <a href="capabilities.html#pro" class="btn small-btn">Подробнее →</a>
+                        </div>
+                    </div>
+
+                    <div class="world-card public-world">
+                        <div class="world-header">
+                            <h3><i class="fas fa-users"></i> Public Mode</h3>
+                            <div class="world-badge">Для всех</div>
+                        </div>
+                        <div class="world-content">
+                            <ul>
+                                <li><i class="fas fa-check"></i> Земля со спутников</li>
+                                <li><i class="fas fa-check"></i> Трекинг МКС</li>
+                                <li><i class="fas fa-check"></i> Космическая погода</li>
+                                <li><i class="fas fa-check"></i> Прогноз по звездам</li>
+                            </ul>
+                            <a href="capabilities.html#public" class="btn small-btn">Подробнее →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Призыв к действию -->
+        <section class="cta-section">
+            <div class="container">
+                <h2>Готовы к запуску?</h2>
+                <p>Присоединяйтесь к будущему космической безопасности уже сегодня</p>
+                <div class="cta-buttons">
+                    <a href="registration.html" class="btn primary-btn large">
+                        <i class="fas fa-rocket"></i> Начать регистрацию
+                    </a>
+                    <a href="../frontend/demo.html" class="btn secondary-btn large">
+                        <i class="fas fa-play-circle"></i> Посмотреть демо
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Подвал -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <div class="logo-icon small">
+                            <div class="orbit"></div>
+                            <div class="core"></div>
+                        </div>
+                        <span>AeroAssist</span>
+                    </div>
+                    <p class="footer-tagline">AI Sentinel of the Cosmos</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Продукт</h4>
+                        <a href="capabilities.html">Возможности</a>
+                        <a href="../frontend/demo.html">Демо</a>
+                        <a href="space-today.html">Космос сегодня</a>
+                        <a href="registration.html">Регистрация</a>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Компания</h4>
+                        <a href="#about">О нас</a>
+                        <a href="#team">Команда</a>
+                        <a href="#contact">Контакты</a>
+                        <a href="#careers">Карьера</a>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Ресурсы</h4>
+                        <a href="#docs">Документация</a>
+                        <a href="#api">API</a>
+                        <a href="#support">Поддержка</a>
+                        <a href="#blog">Блог</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 AeroAssist. All systems operational.</p>
+                <div class="footer-legal">
+                    <a href="#privacy">Конфиденциальность</a>
+                    <a href="#terms">Условия</a>
+                    <a href="#security">Безопасность</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI Assistant Widget -->
+    <div class="ai-assistant">
+        <button class="assistant-toggle" id="assistantToggle">
+            <i class="fas fa-robot"></i>
+            <span class="notification-dot"></span>
+        </button>
+
+        <div class="assistant-window" id="assistantWindow">
+            <div class="assistant-header">
+                <h4><i class="fas fa-robot"></i> AeroAssist AI</h4>
+                <button class="close-assistant" id="closeAssistant">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="assistant-messages" id="assistantMessages">
+                <div class="message bot">
+                    <div class="message-content">
+                        Привет! Я ваш AI помощник AeroAssist. Чем могу помочь?
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="quick-btn" data-action="demo">
+                    <i class="fas fa-play"></i> Демо
+                </button>
+                <button class="quick-btn" data-action="iss">
+                    <i class="fas fa-satellite"></i> Где МКС?
+                </button>
+                <button class="quick-btn" data-action="help">
+                    <i class="fas fa-question"></i> Помощь
+                </button>
+                <button class="quick-btn" data-action="about">
+                    <i class="fas fa-info"></i> О проекте
+                </button>
+            </div>
+
+            <div class="assistant-input">
+                <input type="text" id="assistantInput" placeholder="Спросите меня о космосе...">
+                <button id="sendMessage">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/script.js"></script>
+</body>
+
+</html>

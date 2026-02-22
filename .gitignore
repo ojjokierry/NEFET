@@ -1,0 +1,29 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+myenv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Uploads and temp files
+uploads/
+*.tmp
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroAssist | Возможности</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+    <style>
+        /* ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ CAPABILITIES */
+        
+        .capabilities-page {
+            padding-top: 80px;
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem auto;
+            max-width: 400px;
+        }
+        
+        .mode-tab {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .mode-tab.active {
+            background: var(--accent-blue);
+            color: var(--bg-primary);
+            border-color: var(--accent-blue);
+        }
+        
+        .mode-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .mode-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .module-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .module-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-5px);
+        }
+        
+        .module-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: rgba(0, 243, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+        }
+        
+        .module-features {
+            margin: 1rem 0;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .feature-item i {
+            color: var(--accent-green);
+            font-size: 0.8rem;
+        }
+        
+        .module-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .action-btn:hover {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+        
+        .action-btn.primary {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+        }
+        
+        .action-btn.primary:hover {
+            background: #00d4e0;
+        }
+        /* ПУБЛИЧНЫЕ ФИЧИ */
+        
+        .public-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+        
+        .public-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .public-card i {
+            font-size: 2rem;
+            color: var(--accent-purple);
+            margin-bottom: 1rem;
+        }
+        
+        .public-card h3 {
+            margin-bottom: 1rem;
+        }
+        
+        .public-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        /* ФОРМА ЗАГРУЗКИ ВИДЕО */
+        
+        .upload-section {
+            background: var(--bg-card);
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin: 3rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-section:hover {
+            border-color: var(--accent-blue);
+        }
+        
+        .upload-section.dragover {
+            border-color: var(--accent-green);
+            background: rgba(0, 255, 157, 0.05);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-input {
+            display: none;
+        }
+        
+        .upload-label {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background: var(--accent-blue);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-label:hover {
+            background: #00d4e0;
+        }
+        
+        .file-info {
+            margin-top: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        /* ПРОГРЕСС БАР */
+        
+        .progress-container {
+            margin: 2rem 0;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        /* РЕЗУЛЬТАТЫ АНАЛИЗА */
+        
+        .results-section {
+            display: none;
+            margin: 2rem 0;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .result-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .detection-list {
+            margin-top: 1.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .detection-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .detection-time {
+            color: var(--accent-blue);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+        }
+        
+        .detection-type {
+            color: var(--text-secondary);
+        }
+        
+        .detection-confidence {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+        /* КАМЕРЫ В РЕАЛЬНОМ ВРЕМЕНИ */
+        
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .camera-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .camera-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .camera-status {
+            padding: 0.25rem 0.75rem;
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .camera-status.offline {
+            background: var(--accent-red);
+        }
+        
+        .camera-preview {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+        
+        .camera-controls {
+            padding: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .control-btn {
+            flex: 1;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+        
+        .control-btn.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+        }
+        /* ИНФОРМАЦИОННЫЕ БЛОКИ */
+        
+        .info-blocks {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+        
+        .info-block {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .info-block h3 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .info-block ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+        
+        .info-block li {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+        
+        .info-block li:before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent-blue);
+        }
+    </style>
+</head>
+
+<body class="night-theme">
+
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <div class="orbit"></div>
+                    <div class="core"></div>
+                </div>
+                <span class="logo-text">AeroAssist</span>
+            </a>
+
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+
+           <div class="nav-menu" id="navMenu">
+    <a href="/" class="nav-link">
+        <i class="fas fa-home"></i> Главная
+    </a>
+    <a href="/capabilities" class="nav-link active">
+        <i class="fas fa-satellite"></i> Возможности
+    </a>
+    <a href="/demo" class="nav-link">
+        <i class="fas fa-play-circle"></i> Демо
+    </a>
+    <a href="/space-today" class="nav-link">
+        <i class="fas fa-globe-americas"></i> Космос
+    </a>
+    <a href="/registration" class="nav-link">
+        <i class="fas fa-user-astronaut"></i> Регистрация
+    </a>
+</div>
+
+            <div class="nav-controls">
+                <button class="theme-toggle" id="themeToggle" aria-label="Сменить тему">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="../frontend/demo.html" class="btn demo-btn">
+                    <i class="fas fa-rocket"></i> Демо
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Главный контент -->
+    <main class="main-content capabilities-page">
+        <div class="container">
+            <!-- Заголовок -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Возможности <span class="accent">AeroAssist</span></h1>
+                    <p class="hero-subtitle">
+                        Профессиональные инструменты для космической безопасности и публичный доступ к космическим данным
+                    </p>
+                </div>
+            </section>
+
+            <!-- Переключатель режимов -->
+            <div class="mode-selector">
+                <div class="mode-tab active" data-mode="pro">
+                    <i class="fas fa-user-secret"></i>
+                    <span>Pro режим</span>
+                </div>
+                <div class="mode-tab" data-mode="public">
+                    <i class="fas fa-users"></i>
+                    <span>Public режим</span>
+                </div>
+            </div>
+
+            <!-- PRO РЕЖИМ -->
+            <div class="mode-content active" id="proMode">
+                <h2 class="section-title">Профессиональные инструменты</h2>
+
+                <!-- Загрузка видео для анализа -->
+                <div class="upload-section" id="uploadSection">
+                    <div class="upload-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h3>Загрузите видео для анализа</h3>
+                    <p>Загрузите видео с камеры ракеты, скафандра или медицинского наблюдения</p>
+                    <input type="file" id="videoUpload" class="upload-input" accept="video/*,.mp4,.mov,.avi">
+                    <label for="videoUpload" class="upload-label">
+                        <i class="fas fa-upload"></i> Выбрать видео
+                    </label>
+                    <div class="file-info" id="fileInfo">
+                        Поддерживаемые форматы: MP4, MOV, AVI (до 500MB)
+                    </div>
+                </div>
+
+                <!-- Прогресс анализа -->
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span>Анализ видео...</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                </div>
+
+                <!-- Результаты анализа -->
+                <div class="results-section" id="resultsSection">
+                    <h3><i class="fas fa-chart-bar"></i> Результаты анализа</h3>
+
+                    <div class="results-grid">
+                        <div class="result-card">
+                            <div class="result-label">Обнаружено аномалий</div>
+                            <div class="result-value" id="anomalyCount">0</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Точность анализа</div>
+                            <div class="result-value" id="accuracyValue">94.7%</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Время обработки</div>
+                            <div class="result-value" id="processingTime">2.4s</div>
+                        </div>
+                    </div>
+
+                    <div class="detection-list" id="detectionList">
+                        <!-- Детекции будут добавляться здесь -->
+                    </div>
+
+                    <div class="module-actions">
+                        <button class="action-btn" onclick="exportResults()">
+                            <i class="fas fa-download"></i> Экспорт отчета
+                        </button>
+                        <button class="action-btn primary" onclick="analyzeAnother()">
+                            <i class="fas fa-redo"></i> Новый анализ
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Модули AI -->
+                <div class="modules-grid">
+                    <div class="module-card">
+                        <div class="module-icon">
+                            <i class="fas fa-cracked-egg"></i>
+                        </div>
+                        <h3>Детекция трещин</h3>
+                        <p>Обнаружение микротрещин в материалах ракет и космических аппаратов</p>
+
+                        <div class="module-features">
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Точность: до 99.2%</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Размер трещин: от 0.1 мм</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Режимы: реальное время / анализ записей</span>
+                            </div>
+                        </div>
+
+                        <div class="module-actions">
+                            <button class="action-btn" onclick="loadDemoVideo('crack')">
+                                <i class="fas fa-play"></i> Демо
+                            </button>
+                            <button class="action-btn primary" onclick="startCameraStream('crack')">
+                                <i class="fas fa-camera"></i> Камера
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="module-card">
+                        <div class="module-icon">
+                            <i class="fas fa-user-astronaut"></i>
+                        </div>
+                        <h3>Проверка скафандров</h3>
+                        <p>Контроль герметичности и правильности надевания космических скафандров</p>
+
+                        <div class="module-features">
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Проверка 27 ключевых точек</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Время проверки: 12 секунд</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Автооповещение при ошибках</span>
+                            </div>
+                        </div>
+
+                        <div class="module-actions">
+                            <button class="action-btn" onclick="loadDemoVideo('suit')">
+                                <i class="fas fa-play"></i> Демо
+                            </button>
+                            <button class="action-btn primary" onclick="startCameraStream('suit')">
+                                <i class="fas fa-camera"></i> Камера
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="module-card">
+                        <div class="module-icon">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <h3>Медицинский мониторинг</h3>
+                        <p>Анализ состояния космонавтов через компьютерное зрение</p>
+
+                        <div class="module-features">
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Мониторинг пульса и дыхания</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Обнаружение стресса и усталости</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Интеграция с медицинскими датчиками</span>
+                            </div>
+                        </div>
+
+                        <div class="module-actions">
+                            <button class="action-btn" onclick="loadDemoVideo('medical')">
+                                <i class="fas fa-play"></i> Демо
+                            </button>
+                            <button class="action-btn primary" onclick="startCameraStream('medical')">
+                                <i class="fas fa-camera"></i> Камера
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="module-card">
+                        <div class="module-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h3>Детекция аномалий</h3>
+                        <p>Автоматическое обнаружение нештатных ситуаций в реальном времени</p>
+
+                        <div class="module-features">
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Поиск температурных аномалий</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Детекция вибраций и деформаций</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Предсказание отказов систем</span>
+                            </div>
+                        </div>
+
+                        <div class="module-actions">
+                            <button class="action-btn" onclick="loadDemoVideo('anomaly')">
+                                <i class="fas fa-play"></i> Демо
+                            </button>
+                            <button class="action-btn primary" onclick="startCameraStream('anomaly')">
+                                <i class="fas fa-camera"></i> Камера
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Камеры в реальном времени -->
+<!-- Камеры в реальном времени -->
+<h3 class="section-title">Камеры в реальном времени</h3>
+<div class="camera-grid" id="cameraGrid">
+    <!-- Camera 1 - Rocket/Crack Detection -->
+    <div class="camera-card" id="camera1">
+        <div class="camera-header">
+            <h4><i class="fas fa-rocket"></i> <span class="camera-name">Ракетная камера</span></h4>
+            <div class="camera-badge" style="background: var(--accent-blue);">Детекция трещин</div>
+            <div class="camera-status online" id="camera1-status">ONLINE</div>
+        </div>
+        <div class="camera-preview" id="camera1Preview">
+            <img id="camera1-feed" src="" style="display: none;">
+            <div class="camera-placeholder" id="camera1-placeholder">
+                <i class="fas fa-rocket"></i>
+                <p>Подключение к ракетной камере...</p>
+            </div>
+        </div>
+        <div class="camera-stats" id="camera1-stats">
+            <span><i class="fas fa-chart-line"></i> <span id="camera1-fps">0</span> FPS</span>
+            <span><i class="fas fa-eye"></i> <span id="camera1-detections">0</span> детекций</span>
+            <span><i class="fas fa-microchip"></i> Модель: Crack</span>
+        </div>
+        <div class="camera-controls" id="camera1-controls">
+            <button class="control-btn" onclick="toggleCamera('camera1')">
+                <i class="fas fa-power-off"></i> Вкл/Выкл
+            </button>
+            <button class="control-btn" onclick="startAnalysis('camera1')">
+                <i class="fas fa-play"></i> Анализ
+            </button>
+            <button class="control-btn" onclick="takeSnapshot('camera1')">
+                <i class="fas fa-camera"></i> Снимок
+            </button>
+            <button class="control-btn" onclick="showCameraInfo('camera1')">
+                <i class="fas fa-info-circle"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Camera 2 - Suit Inspection -->
+    <div class="camera-card" id="camera2">
+        <div class="camera-header">
+            <h4><i class="fas fa-user-astronaut"></i> <span class="camera-name">Скафандр камера</span></h4>
+            <div class="camera-badge" style="background: var(--accent-purple);">Проверка скафандра</div>
+            <div class="camera-status online" id="camera2-status">ONLINE</div>
+        </div>
+        <div class="camera-preview" id="camera2Preview">
+            <img id="camera2-feed" src="" style="display: none;">
+            <div class="camera-placeholder" id="camera2-placeholder">
+                <i class="fas fa-user-astronaut"></i>
+                <p>Подключение к камере скафандра...</p>
+            </div>
+        </div>
+        <div class="camera-stats" id="camera2-stats">
+            <span><i class="fas fa-chart-line"></i> <span id="camera2-fps">0</span> FPS</span>
+            <span><i class="fas fa-eye"></i> <span id="camera2-detections">0</span> детекций</span>
+            <span><i class="fas fa-microchip"></i> Модель: Suit</span>
+        </div>
+        <div class="camera-controls" id="camera2-controls">
+            <button class="control-btn" onclick="toggleCamera('camera2')">
+                <i class="fas fa-power-off"></i> Вкл/Выкл
+            </button>
+            <button class="control-btn" onclick="startAnalysis('camera2')">
+                <i class="fas fa-play"></i> Анализ
+            </button>
+            <button class="control-btn" onclick="takeSnapshot('camera2')">
+                <i class="fas fa-camera"></i> Снимок
+            </button>
+            <button class="control-btn" onclick="showCameraInfo('camera2')">
+                <i class="fas fa-info-circle"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Camera 3 - Medical Monitoring -->
+    <div class="camera-card" id="camera3">
+        <div class="camera-header">
+            <h4><i class="fas fa-heartbeat"></i> <span class="camera-name">Медицинская камера</span></h4>
+            <div class="camera-badge" style="background: var(--accent-green);">Медицинский мониторинг</div>
+            <div class="camera-status online" id="camera3-status">ONLINE</div>
+        </div>
+        <div class="camera-preview" id="camera3Preview">
+            <img id="camera3-feed" src="" style="display: none;">
+            <div class="camera-placeholder" id="camera3-placeholder">
+                <i class="fas fa-heartbeat"></i>
+                <p>Подключение к медицинской камере...</p>
+            </div>
+        </div>
+        <div class="camera-stats" id="camera3-stats">
+            <span><i class="fas fa-chart-line"></i> <span id="camera3-fps">0</span> FPS</span>
+            <span><i class="fas fa-eye"></i> <span id="camera3-detections">0</span> детекций</span>
+            <span><i class="fas fa-microchip"></i> Модель: Medical</span>
+        </div>
+        <div class="camera-controls" id="camera3-controls">
+            <button class="control-btn" onclick="toggleCamera('camera3')">
+                <i class="fas fa-power-off"></i> Вкл/Выкл
+            </button>
+            <button class="control-btn" onclick="startAnalysis('camera3')">
+                <i class="fas fa-play"></i> Анализ
+            </button>
+            <button class="control-btn" onclick="takeSnapshot('camera3')">
+                <i class="fas fa-camera"></i> Снимок
+            </button>
+            <button class="control-btn" onclick="showCameraInfo('camera3')">
+                <i class="fas fa-info-circle"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Camera Button (optional) -->
+<div style="text-align: center; margin: 2rem 0;">
+    <button class="btn primary-btn" onclick="showAddCameraModal()">
+        <i class="fas fa-plus-circle"></i> Подключить новую камеру
+    </button>
+</div>
+
+<style>
+.camera-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: white;
+    margin-left: 0.5rem;
+}
+
+.camera-stats {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.camera-stats span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.camera-stats i {
+    color: var(--accent-blue);
+    font-size: 0.8rem;
+}
+</style>
+
+
+
+<!-- Add Camera Button (optional) -->
+
+                <!-- Emotion Detection Section -->
+<h3 class="section-title">🎭 Голосовые эмоции</h3>
+<div class="emotion-container">
+    <div class="emotion-card">
+        <div class="emotion-header">
+            <h4><i class="fas fa-microphone"></i> Анализ эмоций</h4>
+            <div class="emotion-status" id="emotionStatus">Готов</div>
+        </div>
+
+        <div class="emotion-visual" id="emotionVisual">
+            <div class="emotion-wave" id="emotionWave">
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="emotion-result" id="emotionResult">
+                <div class="emotion-icon" id="emotionIcon">
+                    <i class="fas fa-smile"></i>
+                </div>
+                <div class="emotion-text">
+                    <span id="emotionName">—</span>
+                    <span id="emotionConfidence">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="emotion-controls">
+            <button class="btn primary-btn" id="startRecording" onclick="startEmotionRecording()">
+                <i class="fas fa-microphone"></i> Начать запись
+            </button>
+            <button class="btn secondary-btn" id="stopRecording" onclick="stopEmotionRecording()" disabled>
+                <i class="fas fa-stop"></i> Остановить
+            </button>
+        </div>
+
+        <div class="emotion-stats" id="emotionStats">
+            <div class="emotion-bar" style="height: 0%"></div>
+        </div>
+
+        <div class="emotion-history" id="emotionHistory">
+            <h5>История эмоций</h5>
+            <div class="history-list" id="emotionHistoryList">
+                <!-- History items will appear here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.emotion-container {
+    margin: 2rem 0;
+}
+
+.emotion-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.emotion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.emotion-status {
+    padding: 0.25rem 0.75rem;
+    background: var(--accent-blue);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.emotion-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.emotion-wave {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 60px;
+    margin-bottom: 1rem;
+}
+
+.emotion-wave span {
+    width: 8px;
+    height: 20px;
+    background: var(--accent-blue);
+    border-radius: 4px;
+    animation: wave 1s ease-in-out infinite;
+    animation-play-state: paused;
+}
+
+.emotion-wave.recording span {
+    animation-play-state: running;
+}
+
+.emotion-wave span:nth-child(2) { animation-delay: 0.1s; }
+.emotion-wave span:nth-child(3) { animation-delay: 0.2s; }
+.emotion-wave span:nth-child(4) { animation-delay: 0.3s; }
+.emotion-wave span:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes wave {
+    0%, 100% { height: 20px; }
+    50% { height: 40px; }
+}
+
+.emotion-result {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 50px;
+}
+
+.emotion-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    background: var(--accent-blue);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.emotion-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.emotion-text #emotionName {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.emotion-text #emotionConfidence {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+.emotion-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.emotion-stats {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.emotion-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+    transition: width 0.3s ease;
+}
+
+.emotion-history {
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+}
+
+.emotion-history h5 {
+    margin-bottom: 1rem;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.history-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-blue);
+}
+
+.history-details {
+    flex: 1;
+}
+
+.history-emotion {
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.history-time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.history-confidence {
+    font-weight: bold;
+    color: var(--accent-green);
+}
+</style>
+
+
+
+            <!-- PUBLIC РЕЖИМ -->
+            <div class="mode-content" id="publicMode">
+                <h2 class="section-title">Публичные космические сервисы</h2>
+                
+                <div class="public-features">
+                    <div class="public-card">
+                        <i class="fas fa-satellite"></i>
+                        <h3>Земля со спутников</h3>
+                        <p>Актуальные снимки Земли из космоса. Обновление каждые 10 минут.</p>
+                        <button class="action-btn" onclick="showEarthView()">
+                            <i class="fas fa-eye"></i> Показать
+                        </button>
+                        </div>
+
+                        <div class="public-card">
+                            <i class="fas fa-space-shuttle"></i>
+                            <h3>Трекинг МКС</h3>
+                            <p>Текущее положение МКС и прогноз пролетов над вашим городом.</p>
+                            <button class="action-btn" onclick="showISSLocation()">
+                            <i class="fas fa-map-marker-alt"></i> На карте
+                        </button>
+                        </div>
+
+                        <div class="public-card">
+                            <i class="fas fa-sun"></i>
+                            <h3>Космическая погода</h3>
+                            <p>Солнечная активность, магнитные бури и их влияние на Землю.</p>
+                            <button class="action-btn" onclick="showSpaceWeather()">
+                            <i class="fas fa-chart-line"></i> Статистика
+                        </button>
+                        </div>
+
+                        <div class="public-card">
+                            <i class="fas fa-rocket"></i>
+                            <h3>Запуски ракет</h3>
+                            <p>Расписание космических запусков и онлайн-трансляции.</p>
+                            <button class="action-btn" onclick="showLaunchSchedule()">
+                            <i class="fas fa-calendar"></i> Расписание
+                        </button>
+                        </div>
+                    </div>
+
+                    <!-- Информационные блоки -->
+                    <div class="info-blocks">
+                        <div class="info-block">
+                            <h3><i class="fas fa-info-circle"></i> Как это работает?</h3>
+                            <ul>
+                                <li>Спутниковые снимки поступают с NASA и ESA</li>
+                                <li>Данные обновляются в реальном времени</li>
+                                <li>ИИ анализирует космическую погоду</li>
+                                <li>Прогнозы составляются на 72 часа</li>
+                            </ul>
+                        </div>
+
+                        <div class="info-block">
+                            <h3><i class="fas fa-clock"></i> Расписание обновлений</h3>
+                            <ul>
+                                <li>Земля: каждые 10 минут</li>
+                                <li>МКС: каждые 5 секунд</li>
+                                <li>Погода: каждый час</li>
+                                <li>Запуски: ежедневно</li>
+                            </ul>
+                        </div>
+
+                        <div class="info-block">
+                            <h3><i class="fas fa-database"></i> Источники данных</h3>
+                            <ul>
+                                <li>NASA Earth API</li>
+                                <li>ESA Sentinel</li>
+                                <li>NOAA Space Weather</li>
+                                <li>Open Source Satellite</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Призыв к действию -->
+                <section class="cta-section">
+                    <div class="container">
+                        <h2>Начните использовать AeroAssist уже сегодня</h2>
+                        <p>Зарегистрируйтесь для получения доступа ко всем возможностям платформы</p>
+                        <div class="cta-buttons">
+                            <a href="registration.html" class="btn primary-btn large">
+                                <i class="fas fa-rocket"></i> Регистрация
+                            </a>
+                            <a href="../frontend/demo.html" class="btn secondary-btn large">
+                                <i class="fas fa-play-circle"></i> Посмотреть демо
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    <!-- Подвал -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <div class="logo-icon small">
+                            <div class="orbit"></div>
+                            <div class="core"></div>
+                        </div>
+                        <span>AeroAssist</span>
+                    </div>
+                    <p class="footer-tagline">AI Sentinel of the Cosmos</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Режимы</h4>
+                        <a href="#proMode">Pro режим</a>
+                        <a href="#publicMode">Public режим</a>
+                        <a href="../frontend/demo.html">Демо</a>
+                        <a href="registration.html">Регистрация</a>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Ресурсы</h4>
+                        <a href="#docs">Документация</a>
+                        <a href="#api">API</a>
+                        <a href="#blog">Блог</a>
+                        <a href="#support">Поддержка</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 AeroAssist. All systems operational.</p>
+                <div class="footer-legal">
+                    <a href="#privacy">Конфиденциальность</a>
+                    <a href="#terms">Условия</a>
+                    <a href="#security">Безопасность</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI Assistant Widget -->
+    <div class="ai-assistant">
+        <button class="assistant-toggle" id="assistantToggle">
+            <i class="fas fa-robot"></i>
+            <span class="notification-dot"></span>
+        </button>
+
+        <div class="assistant-window" id="assistantWindow">
+            <div class="assistant-header">
+                <h4><i class="fas fa-robot"></i> AeroAssist AI</h4>
+                <button class="close-assistant" id="closeAssistant">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="assistant-messages" id="assistantMessages">
+                <div class="message bot">
+                    <div class="message-content">
+                        Чем могу помочь с возможностями платформы?
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="loadDemoVideo('crack')">
+                    <i class="fas fa-cracked-egg"></i> Демо трещин
+                </button>
+                <button class="quick-btn" onclick="showEarthView()">
+                    <i class="fas fa-globe"></i> Земля сейчас
+                </button>
+                <button class="quick-btn" onclick="startCameraStream(1)">
+                    <i class="fas fa-camera"></i> Камера 1
+                </button>
+                <button class="quick-btn" onclick="uploadVideo()">
+                    <i class="fas fa-upload"></i> Загрузить видео
+                </button>
+            </div>
+
+            <div class="assistant-input">
+                <input type="text" id="assistantInput" placeholder="Задайте вопрос...">
+                <button id="sendMessage">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/script.js"></script>
+    <script>
+        // ===== ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Переключение вкладок
+            const modeTabs = document.querySelectorAll('.mode-tab');
+            const modeContents = document.querySelectorAll('.mode-content');
+
+            modeTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const mode = this.dataset.mode;
+
+                    // Обновить активную вкладку
+                    modeTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Показать соответствующий контент
+                    modeContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === mode + 'Mode') {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // Загрузка видео
+            initVideoUpload();
+
+            // Запуск камер
+            initCameras();
+        });
+
+        // ===== ЗАГРУЗКА ВИДЕО ДЛЯ АНАЛИЗА =====
+        function initVideoUpload() {
+            const uploadInput = document.getElementById('videoUpload');
+            const uploadSection = document.getElementById('uploadSection');
+            const fileInfo = document.getElementById('fileInfo');
+
+            if (!uploadInput) return;
+
+            // Drag and drop
+            uploadSection.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            uploadSection.addEventListener('dragleave', function() {
+                this.classList.remove('dragover');
+            });
+
+            uploadSection.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+
+                if (e.dataTransfer.files.length) {
+                    handleVideoFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            // Выбор файла через диалог
+            uploadInput.addEventListener('change', function() {
+                if (this.files.length) {
+                    handleVideoFile(this.files[0]);
+                }
+            });
+
+            // Клик по секции загрузки
+            uploadSection.addEventListener('click', function(e) {
+                if (e.target !== uploadInput) {
+                    uploadInput.click();
+                }
+            });
+        }
+
+        function handleVideoFile(file) {
+            const fileInfo = document.getElementById('fileInfo');
+
+            // Проверка типа файла
+            const validTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo'];
+            if (!validTypes.includes(file.type)) {
+                fileInfo.innerHTML = '<span style="color: var(--accent-red)">Неверный формат файла. Используйте MP4, MOV или AVI.</span>';
+                return;
+            }
+
+            // Проверка размера (макс 500MB)
+            if (file.size > 500 * 1024 * 1024) {
+                fileInfo.innerHTML = '<span style="color: var(--accent-red)">Файл слишком большой. Максимум 500MB.</span>';
+                return;
+            }
+
+            // Показать информацию о файле
+            const fileSize = (file.size / (1024 * 1024)).toFixed(1);
+            fileInfo.innerHTML = `
+                <i class="fas fa-check-circle" style="color: var(--accent-green)"></i>
+                Выбран файл: ${file.name} (${fileSize} MB)
+            `;
+
+            // Запустить анализ
+            simulateVideoAnalysis(file);
+        }
+
+        function simulateVideoAnalysis(file) {
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressPercent = document.getElementById('progressPercent');
+            const resultsSection = document.getElementById('resultsSection');
+            const detectionList = document.getElementById('detectionList');
+
+            // Показать прогресс
+            progressContainer.style.display = 'block';
+            resultsSection.style.display = 'none';
+
+            // Симуляция анализа
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 100) progress = 100;
+
+                progressFill.style.width = progress + '%';
+                progressPercent.textContent = Math.round(progress) + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+
+                    // Показать результаты через 500мс
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        resultsSection.style.display = 'block';
+
+                        // Генерация случайных результатов
+                        generateRandomResults();
+                    }, 500);
+                }
+            }, 200);
+        }
+
+        function generateRandomResults() {
+            const anomalyCount = document.getElementById('anomalyCount');
+            const accuracyValue = document.getElementById('accuracyValue');
+            const processingTime = document.getElementById('processingTime');
+            const detectionList = document.getElementById('detectionList');
+
+            // Случайные значения
+            const anomalies = Math.floor(Math.random() * 8) + 1;
+            const accuracy = (90 + Math.random() * 9).toFixed(1);
+            const time = (1.5 + Math.random() * 3).toFixed(1);
+
+            anomalyCount.textContent = anomalies;
+            accuracyValue.textContent = accuracy + '%';
+            processingTime.textContent = time + 's';
+
+            // Генерация списка детекций
+            const detectionTypes = [
+                'Микротрещина', 'Коррозия', 'Деформация', 'Температурная аномалия',
+                'Вибрация', 'Утечка', 'Потеря герметичности', 'Структурное повреждение'
+            ];
+
+            detectionList.innerHTML = '';
+            for (let i = 0; i < anomalies; i++) {
+                const type = detectionTypes[Math.floor(Math.random() * detectionTypes.length)];
+                const time = `${Math.floor(Math.random() * 60)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`;
+                const confidence = (70 + Math.random() * 29).toFixed(1);
+
+                const detectionItem = document.createElement('div');
+                detectionItem.className = 'detection-item';
+                detectionItem.innerHTML = `
+                    <div class="detection-time">${time}</div>
+                    <div class="detection-type">${type}</div>
+                    <div class="detection-confidence">${confidence}%</div>
+                `;
+                detectionList.appendChild(detectionItem);
+            }
+        }
+
+        function exportResults() {
+            alert('Отчет экспортирован в формате PDF. Файл будет загружен автоматически.');
+            // Здесь будет реальная логика экспорта
+        }
+
+        function analyzeAnother() {
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('fileInfo').innerHTML = 'Поддерживаемые форматы: MP4, MOV, AVI (до 500MB)';
+            document.getElementById('videoUpload').value = '';
+        }
+
+        // ===== РАБОТА С КАМЕРАМИ =====
+        function initCameras() {
+            // Симуляция работы камер
+            setInterval(() => {
+                updateCameraStatus();
+            }, 5000);
+        }
+
+        function updateCameraStatus() {
+            // Случайное изменение статуса камер
+            const cameras = document.querySelectorAll('.camera-status');
+            cameras.forEach(status => {
+                if (Math.random() > 0.95) { // 5% шанс изменения статуса
+                    if (status.classList.contains('offline')) {
+                        status.classList.remove('offline');
+                        status.textContent = 'ONLINE';
+                    } else {
+                        status.classList.add('offline');
+                        status.textContent = 'OFFLINE';
+                    }
+                }
+            });
+        }
+
+        function toggleCamera(cameraId) {
+            const status = document.querySelector(`#camera${cameraId}Preview`).parentElement.querySelector('.camera-status');
+            const preview = document.getElementById(`camera${cameraId}Preview`);
+
+            if (status.classList.contains('offline')) {
+                status.classList.remove('offline');
+                status.textContent = 'ONLINE';
+                preview.innerHTML = '<div class="camera-placeholder"><i class="fas fa-video"></i><p>Камера запущена</p></div>';
+            } else {
+                status.classList.add('offline');
+                status.textContent = 'OFFLINE';
+                preview.innerHTML = '<div class="camera-placeholder"><i class="fas fa-video-slash"></i><p>Камера отключена</p></div>';
+            }
+        }
+
+        function startAnalysis(cameraId) {
+            alert(`Запущен анализ камеры #${cameraId}. Результаты будут через 5-10 секунд.`);
+            // Здесь будет реальный запуск анализа
+        }
+
+        function snapshot(cameraId) {
+            alert(`Снимок с камеры #${cameraId} сохранен.`);
+            // Здесь будет реальный захват кадра
+        }
+
+        // ===== ФУНКЦИИ ДЛЯ КНОПОК =====
+        function loadDemoVideo(type) {
+            const videos = {
+                crack: 'Демо детекции трещин загружено',
+                suit: 'Демо проверки скафандра загружено',
+                medical: 'Демо медицинского мониторинга загружено',
+                anomaly: 'Демо детекции аномалий загружено'
+            };
+
+            alert(videos[type] || 'Демо загружено');
+            // Здесь будет реальная загрузка демо-видео
+        }
+
+        function startCameraStream(type) {
+            alert(`Запуск камеры для ${type}. Подключение к камере...`);
+            // Здесь будет реальное подключение к камере
+        }
+
+        function showEarthView() {
+            alert('Открывается вид Земли со спутников');
+            // Здесь будет реальный вид Земли
+        }
+
+        function showISSLocation() {
+            alert('Показано текущее положение МКС');
+            // Здесь будет реальная карта с МКС
+        }
+
+        function showSpaceWeather() {
+            alert('Открыта статистика космической погоды');
+            // Здесь будет реальная статистика
+        }
+
+        function showLaunchSchedule() {
+            alert('Открыто расписание запусков');
+            // Здесь будет реальное расписание
+        }
+
+        function uploadVideo() {
+            document.getElementById('videoUpload').click();
+        }
+    </script>
+</body>
+
+</html>
