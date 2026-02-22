@@ -1,0 +1,347 @@
+import speech_recognition as sr
+import tkinter as tk
+from tkinter import scrolledtext, Label, Button
+import threading
+import os
+import wikipedia
+from datetime import datetime
+import json
+import random
+import webbrowser
+import sys
+import time  
+root = tk.Tk()
+root.title("AIRO — Космический ассистент PRO")
+root.geometry("750x550")
+root.configure(bg="#0b0c1c")
+class KnowledgeBase:
+    def __init__(self):
+  self.base = [
+            "космос": "Космос — это бесконечное пространство, состоящее из галактик, звёзд, планет и тёмной материи.",
+            "солнце": "Солнце — звезда в центре Солнечной системы. Температура ядра: 15 миллионов °C.",
+            "земля": "Земля — третья планета от Солнца. Возраст: 4.5 миллиарда лет. Единственная планета с жизнью.",
+            "луна": "Луна — естественный спутник Земли. Диаметр: 3 474 км. Расстояние до Земли: 384 400 км.",
+            "марс": "Марс — четвёртая планета. Красный цвет из-за оксида железа. Есть вода в виде льда.",
+            "юпитер": "Юпитер — крупнейшая планета. Состоит из газа. Имеет 79 известных спутников.",
+            "сатурн": "Сатурн — вторая по величине планета. Известен своими кольцами из льда и камней.",
+            "вселенная": "Вселенная родилась 13.8 миллиардов лет назад в результате Большого Взрыва.",
+            "галактика": "Галактика — система из звёзд, газа и пыли. Наша галактика — Млечный Путь.",
+            "чёрная дыра": "Чёрная дыра — область с такой сильной гравитацией, что даже свет не может её покинуть.",
+            "звезда": "Звезда — раскалённый шар плазмы. Наше Солнце — звезда среднего размера.",
+            "планета": "Планета — небесное тело, вращающееся вокруг звезды. В Солнечной системе 8 планет.",
+            "астероид": "Астероид — небольшое каменистое тело. Большинство находятся между Марсом и Юпитером.",
+            "комета": "Комета — ледяное тело, испускающее газ и пыль при приближении к Солнцу.",
+            "спутник": "Спутник — объект, вращающийся вокруг планеты. Луна — спутник Земли.",
+            "искусственный интеллект": "ИИ — способность машин имитировать человеческий интеллект. Я являюсь примером ИИ.",
+            "программирование": "Программирование — создание инструкций для компьютеров на специальных языках.",
+            "python": "Python — высокоуровневый язык программирования. Простой синтаксис, мощные возможности.",
+            "робот": "Робот — машина, способная выполнять задачи автоматически или по программе.",
+            "компьютер": "Компьютер — электронное устройство для обработки данных и выполнения программ.",
+            "океан": "Мировой океан покрывает 71% поверхности Земли. Самый большой — Тихий океан.",
+            "гора": "Гора Эверест — высочайшая вершина Земли (8 848 м).",
+            "пустыня": "Пустыня Сахара — крупнейшая жаркая пустыня. Площадь: 9.2 млн км².",
+            "лес": "Леса занимают 31% суши. Амазонские леса — самые большие тропические леса.",
+            "река": "Амазонка — самая полноводная река в мире. Длина: 6 992 км.",
+            "человек": "Человек — вид Homo sapiens. Мозг содержит около 86 миллиардов нейронов.",
+            "мозг": "Мозг человека — самый сложный орган. Потребляет 20% энергии тела.",
+            "сердце": "Сердце перекачивает кровь по всему телу. Бьется около 100 000 раз в день.",
+            "днк": "ДНК — молекула, хранящая генетическую информацию. Состоит из 3 миллиардов пар оснований.",
+            "древний рим": "Римская империя существовала с 27 года до н.э. до 476 года н.э.",
+            "древняя греция": "Древняя Греция — колыбель демократии, философии и Олимпийских игр.",
+            "средневековье": "Период с V по XV век. Эпоха рыцарей, замков и великих географических открытий.",
+            "погода": "Погода — состояние атмосферы в определённом месте в определённое время.",
+            "музыка": "Музыка — искусство звуков. Существует более 1300 музыкальных жанров.",
+            "спорт": "Спорт — физическая активность для укрепления здоровья и соревнований.",
+            "книга": "Книга — источник знаний. Первая печатная книга — Библия Гутенберга (1455 год)."
+        }
+    def search(self, query):
+        query_lower = query.lower()
+        if query_lower in self.base:
+            return self.base[query_lower]
+        for key in self.base:
+            if key in query_lower:
+                return self.base[key]
+        return None
+    def add(self, topic, info):
+        self.base[topic.lower()] = info
+kb = KnowledgeBase()
+r = sr.Recognizer()
+user_name = None
+chat = scrolledtext.ScrolledText(
+    root, state='disabled', bg="#1a1b2f", fg="#00ff00",
+    font=("Consolas", 11), wrap=tk.WORD, height=20
+)
+chat.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+status_label = Label(root, text="🎤 Слушаю...", bg="#0b0c1c", fg="#00ffff", font=("Arial", 10))
+status_label.pack(pady=5)
+button_frame = tk.Frame(root, bg="#0b0c1c")
+button_frame.pack(pady=5)
+def add_chat(text, speaker="AIRO"):
+    chat.config(state='normal')
+    if speaker == "AIRO":
+        tag = "airo"
+        chat.tag_config("airo", foreground="#00ff00")
+        prefix = "🤖 AIRO: "
+    else:
+        tag = "user"
+        chat.tag_config("user", foreground="#ff9900")
+        prefix = "👤 Вы: "
+    chat.insert(tk.END, prefix + text + "\n", tag)
+    chat.yview(tk.END)
+    chat.config(state='disabled')
+def speak(text):
+    """Говорить текст"""
+    safe = text.replace('"', '').replace("'", "")
+    add_chat(text, "AIRO")
+    def speak_thread():
+        os.system(
+            f'powershell -Command "Add-Type -AssemblyName System.Speech; '
+            f'(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak(\'{safe}\')"'
+        )
+    threading.Thread(target=speak_thread, daemon=True).start()
+def wiki_lookup(text):
+    try:
+        wikipedia.set_lang("ru")
+        search_results = wikipedia.search(text, results=2)
+        if search_results:
+            try:
+                summary = wikipedia.summary(search_results[0], sentences=2)
+                return f"Из Википедии: {summary}"
+            except wikipedia.exceptions.DisambiguationError as e:
+                options = e.options[:3]
+                return f"Уточните запрос. Возможные варианты: {', '.join(options)}"
+            except:
+                return f"Нашёл статью '{search_results[0]}', но не могу получить описание."
+        return None
+    except:
+        return None
+def open_website(site):
+    """Открыть сайт"""
+    sites = {
+        'youtube': 'https://youtube.com',
+        'ютуб': 'https://youtube.com',
+        'google': 'https://google.com',
+        'гугл': 'https://google.com',
+        'яндекс': 'https://yandex.ru',
+        'википедия': 'https://wikipedia.org'
+    }
+    if site in sites:
+        webbrowser.open(sites[site])
+        return f"Открываю {site}"
+    return None
+def tell_joke():
+    jokes = [
+        "Почему космонавты не едят в космосе? Потому что там невесомость, и еда уплывает!",
+        "Что сказал один астероид другому? У нас же каменные лица!",
+        "Почему Луна не ходит в школу? Потому что она и так всегда на небесах!",
+        "Как называется космический кот? Космокот!",
+        "Почему Солнце никогда не спит? Потому что оно всегда на работе!"
+    ]
+    return random.choice(jokes)
+def tell_fact():
+    facts = [
+        "Ваш мозг генерирует достаточно электричества, чтобы зажечь лампочку.",
+        "Сердце кита бьется всего 9 раз в минуту.",
+        "У осьминога три сердца и голубая кровь.",
+        "Мед — единственный продукт, который никогда не портится.",
+        "На МКС восход солнца происходит каждые 90 минут."
+    ]
+    return f"Интересный факт: {random.choice(facts)}"
+def calculate(expression):
+    try:
+        # Преобразуем русские слова в операторы
+        expr = expression.lower()
+        replacements = {
+            'плюс': '+',
+            'минус': '-',
+            'умножить на': '*',
+            'разделить на': '/',
+            'в степени': '**'
+        }
+        for rus, eng in replacements.items():
+            expr = expr.replace(rus, eng)
+        result = eval(expr, {"__builtins__": {}}, {})
+        return f"Результат: {expression} = {result}"
+    except:
+        return "Не могу это вычислить"
+def process_command(text):
+    global user_name
+    if not text or len(text) < 2:
+        return
+    add_chat(text, "user")
+    if user_name is None:
+        if any(word in text.lower() for word in ['зовут', 'имя', 'меня']):
+            words = text.split()
+            for i, word in enumerate(words):
+                if word.lower() in ['зовут', 'имя'] and i + 1 < len(words):
+                    user_name = words[i + 1].title()
+                    break
+            if user_name is None:
+                user_name = text.title()
+            speak(f"Приятно познакомиться, {user_name}! Теперь я буду обращаться к вам по имени.")
+            return
+    text_lower = text.lower()
+    if any(word in text_lower for word in ['привет', 'здравствуй', 'добрый день']):
+        if user_name:
+            speak(f"Привет, {user_name}! Чем могу помочь?")
+        else:
+            speak("Привет! Как вас зовут?")
+        return
+    if any(word in text_lower for word in ['время', 'сколько время', 'который час']):
+        now = datetime.now()
+        time_str = now.strftime("%H:%M")
+        speak(f"Сейчас {time_str}")
+        return
+    if any(word in text_lower for word in ['дата', 'число', 'какой день']):
+        now = datetime.now()
+        months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+                  'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+        speak(f"Сегодня {now.day} {months[now.month - 1]} {now.year} года")
+        return
+    if 'открой' in text_lower:
+        sites_to_check = ['youtube', 'ютуб', 'google', 'гугл', 'яндекс', 'википедия']
+        for site in sites_to_check:
+            if site in text_lower:
+                result = open_website(site)
+                if result:
+                    speak(result)
+                    return
+        speak("Какой сайт открыть? Например: YouTube, Google, Яндекс")
+        return
+    if any(word in text_lower for word in ['шутка', 'пошути', 'рассмеши']):
+        speak(tell_joke())
+        return
+    if any(word in text_lower for word in ['факт', 'расскажи что-нибудь']):
+        speak(tell_fact())
+        return
+    if any(word in text_lower for word in ['сколько будет', 'посчитай', 'вычисли']):
+        result = calculate(text)
+        speak(result)
+        return
+    if 'айро' in text_lower:
+        speak(f"Я здесь, {user_name}! Готов помочь.")
+        return
+    if any(word in text_lower for word in ['помощь', 'команды', 'что ты умеешь']):
+        help_text = """
+Доступные команды:
+• Привет / Как дела
+• Сколько времени / Какая дата
+• Открой YouTube/Google/Яндекс
+• Расскажи шутку / Расскажи факт
+• Сколько будет [выражение] - калькулятор
+• AIRO - обратиться ко мне
+• Стоп - завершить работу
+
+Также можете спрашивать о:
+• Космосе (Солнце, Луна, Марс, планеты)
+• Технологиях (ИИ, программирование)
+• Науке и природе
+• Истории
+• И многом другом!
+"""
+        speak("Вот что я умею:")
+        for line in help_text.strip().split('\n'):
+            if line.strip():
+                speak(line.strip())
+        return
+    if any(word in text_lower for word in ['стоп', 'выход', 'заверши', 'пока']):
+        if user_name:
+            speak(f"До свидания, {user_name}! Буду ждать нашего следующего разговора.")
+        else:
+            speak("До свидания!")
+        root.quit()
+        return
+    kb_result = kb.search(text)
+    if kb_result:
+        speak(kb_result)
+        return
+    wiki_result = wiki_lookup(text)
+    if wiki_result:
+        speak(wiki_result)
+        return
+    responses = [
+        f"Извините, {user_name}, я не нашёл информацию по этому запросу.",
+        "Этот вопрос выходит за рамки моих текущих знаний.",
+        "Попробуйте задать вопрос по-другому.",
+        "Я ещё учусь, и пока не знаю ответ на этот вопрос."
+    ]
+    speak(random.choice(responses))
+def listen_loop():
+    """Основной цикл прослушивания"""
+    speak("Здравствуйте! Я AIRO, ваш космический ассистент.")
+    speak("Как к вам обращаться?")
+    while True:
+        try:
+            with sr.Microphone() as source:
+                status_label.config(text="🎤 Слушаю...", fg="#00ffff")
+                root.update()
+
+                r.adjust_for_ambient_noise(source, duration=0.5)
+                audio = r.listen(source, timeout=5, phrase_time_limit=8)
+
+            status_label.config(text="🔍 Распознаю...", fg="#ffff00")
+            root.update()
+            try:
+                text = r.recognize_google(audio, language="ru-RU").lower()
+            except sr.UnknownValueError:
+                status_label.config(text="❌ Не распознано", fg="#ff0000")
+                root.update()
+                time.sleep(0.5)
+                continue
+            except sr.RequestError as e:
+                status_label.config(text="⚠️ Нет интернета", fg="#ff9900")
+                root.update()
+                time.sleep(2)
+                continue
+            status_label.config(text="✅ Распознано", fg="#00ff00")
+            root.update()
+            process_command(text)
+        except sr.WaitTimeoutError:
+            continue
+        except Exception as e:
+            print(f"Общая ошибка: {e}")
+            status_label.config(text="⚠️ Ошибка", fg="#ff0000")
+            root.update()
+            time.sleep(1)
+            continue
+        finally:
+            status_label.config(text="🎤 Слушаю...", fg="#00ffff")
+            root.update()
+def manual_command():
+    def send_command():
+        cmd = command_entry.get()
+        if cmd:
+            process_command(cmd)
+            command_entry.delete(0, tk.END)
+    command_window = tk.Toplevel(root)
+    command_window.title("Ручной ввод")
+    command_window.geometry("400x100")
+    command_window.configure(bg="#0b0c1c")
+    tk.Label(command_window, text="Введите команду:", bg="#0b0c1c", fg="#00ffff").pack(pady=5)
+    command_entry = tk.Entry(command_window, width=50, bg="#1a1b2f", fg="#ffffff")
+    command_entry.pack(pady=5)
+    tk.Button(command_window, text="Отправить", command=send_command,
+              bg="#00aaff", fg="white").pack(pady=5)
+def stop_program():
+    if user_name:
+        speak(f"До свидания, {user_name}!")
+    else:
+        speak("До свидания!")
+    root.quit()
+btn_frame = tk.Frame(root, bg="#0b0c1c")
+btn_frame.pack(pady=5)
+tk.Button(btn_frame, text="📝 Ручной ввод", command=manual_command,
+          bg="#1a5f7a", fg="white", font=("Arial", 10)).pack(side=tk.LEFT, padx=5)
+tk.Button(btn_frame, text="❌ Выход", command=stop_program,
+          bg="#ff4444", fg="white", font=("Arial", 10)).pack(side=tk.LEFT, padx=5)
+      def on_closing():
+    stop_program()
+root.protocol("WM_DELETE_WINDOW", on_closing)
+listener_thread = threading.Thread(target=listen_loop, daemon=True)
+listener_thread.start()
+try:
+    root.mainloop()
+except KeyboardInterrupt:
+    print("\nПрограмма завершена пользователем")
+except Exception as e:
+    print(f"Ошибка в главном цикле: {e}")
