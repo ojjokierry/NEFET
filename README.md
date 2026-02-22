@@ -1,6 +1,6 @@
 AeroAssist-NEFET
 A demo MVP of NEFET, presented as a startup: multi-camera AI monitoring system with real-time object detection and space data integration, featuring 3 independent simultaneous camera streams, each having a specialized detection model. Users are allowed to start and stop streams, take snapshots and view real-time stats. Special features include simulated live ISS tracking, NASA APOD and space weather updates. The demo website supports dark and light themes and Russian/English support.
-The models_training folder provides the source code for the training of the object detection, AI voice chat bot and emotion recognition models. Since all of the object detection models use identical source code with different databases, only the code for face defect detection is provided. The databases file provides the list of databases_sourced. 
+The models_training folder provides the source code for the training of the object detection, AI voice chat bot and emotion recognition models. Since all of the object detection models use identical source code with different databases, only the code for facial analysis is provided. The databases file provides the list of databases_sourced. 
 
 Prerequisites: Python 3.8+;
 Webcam or IP cameras
