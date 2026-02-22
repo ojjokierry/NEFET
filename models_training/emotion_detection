@@ -1,0 +1,85 @@
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, LSTM, Dropout
+from tensorflow.keras.utils import to_categorical
+import os
+import numpy as np
+import librosa
+def map_to_base_emotion(folder_name):
+    folder_name = folder_name.lower()
+    for emo in BASE_EMOTIONS:
+        if emo in folder_name:
+            return emo
+    return None
+X = []
+y = []
+NUM_MFCC = 40
+base_path = "/home/elis/.config/JetBrains/PyCharm2025.3/extensions/archive/train"
+BASE_EMOTIONS = [
+    "anger",
+    "disgust",
+    "fear",
+    "happiness",
+    "sadness",
+    "enthusiasm",
+    "neutral"
+]
+label_map = {emo: i for i, emo in enumerate(BASE_EMOTIONS)}
+X = []
+y = []
+for folder in os.listdir(base_path):
+    folder_path = os.path.join(base_path, folder)
+    if not os.path.isdir(folder_path):
+        continue
+    base_emotion = map_to_base_emotion(folder)
+    if base_emotion is None:
+        continue  # skip folders with unknown/mixed emotions
+    label = label_map[base_emotion]
+    for file in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file)
+        if not os.path.isfile(file_path):
+            continue
+        audio, sr = librosa.load(file_path, sr=16000)
+
+        mfcc = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=40)
+
+        energy = librosa.feature.rms(y=audio)
+        energy = (energy - energy.mean()) / (energy.std() + 1e-8)
+        energy *= 0.5
+
+        pitch = librosa.yin(
+            audio,
+            fmin=50,
+            fmax=400,
+            sr=sr,
+            frame_length=2048,
+            hop_length=512
+        )
+        pitch = np.nan_to_num(pitch)
+        pitch = pitch[:mfcc.shape[1]]
+        pitch = pitch.reshape(1, -1)
+
+        features = np.vstack([mfcc, energy, pitch])  # (42, time)
+        features = features.T  # (time, 42)
+
+        X.append(features)
+        y.append(label)
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+X = pad_sequences(X, padding="post", dtype="float32")
+y = to_categorical(y, num_classes = 7)
+num_classes = y.shape[1]
+mean = X.mean()
+std = X.std() + 1e-8
+X = (X - X.mean()) / std
+model = Sequential ([LSTM(256, return_sequences = True, input_shape = (X.shape[1], X.shape[2])),
+                     LSTM(128, return_sequences = False),
+                     Dense(64, activation ='relu'),
+                     Dropout(0.2),
+                     Dense(32, activation = 'relu'),
+                     Dropout(0.2),
+                     Dense(7, activation = 'softmax')
+                     ])
+model.compile(loss='categorical_crossentropy', optimizer = 'adam', metrics=['accuracy'])
+history = model.fit(X, y, validation_split = 0.2, epochs = 100, batch_size = 16, shuffle = True)
+model.save("speech_model_c.keras")
+
+
